@@ -1,0 +1,20 @@
+{
+  "name": "week2",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "A Simple Social Media",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mmd-nemati/backend-Training.git"
+  },
+  "author": "Mmd Nemati",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mmd-nemati/backend-Training/issues"
+  },
+  "homepage": "https://github.com/mmd-nemati/backend-Training#readme"
+}
