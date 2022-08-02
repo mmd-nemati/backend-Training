@@ -43,6 +43,16 @@ users.put('/users/:id', (req, res) => {
     res.send(user);
 });
 
+users.delete('/users/:id', (req, res) => {
+    const user = usersData.find(u => u.id === parseInt(req.params.id));
+    if(!user) return res.status(404).send(`User with ID ${req.params.id} Not Found.`);
+
+    let index = usersData.indexOf(user);
+    usersData.splice(index, 1);
+
+    res.send(user);
+});
+
 function validateUser(user) {
     const schema = Joi.object({ 
         name: Joi.string().required(),
