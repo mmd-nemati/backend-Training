@@ -1,5 +1,6 @@
 import express from 'express';
 import Joi from 'joi';
+import { indexOf } from 'underscore';
 const users = express();
 users.use(express.json());
 
@@ -15,7 +16,6 @@ users.get('/users/:id', (req, res) => {
 
     res.send(user);
 });
-
 
 users.post('/users', (req, res) => {
     const { error } = validateUser(req.body);
@@ -33,11 +33,18 @@ users.post('/users', (req, res) => {
 
 });
 
+users.put('/users/:id', (req, res) => {
+    const user = usersData.find(u => u.id === parseInt(req.params.id));
+    if(!user) return res.status(404).send(`User with ID ${req.params.id} Not Found.`);
+    const { error } = validateUser(req.body);
+    if(error) return res.status(400).send(error.message);
 
-
+    ({ name: user.name, username: user.username, age: user.age } = req.body);
+    res.send(user);
+});
 
 function validateUser(user) {
-    const schema = Joi.object({
+    const schema = Joi.object({ 
         name: Joi.string().required(),
         username: Joi.string().min(5).required(),
         age: Joi.number().integer().min(14).required()
@@ -50,4 +57,4 @@ function isDuplicate(user) {
     return (usersData.find(u => u.username === user.username) !== undefined);
 }
 
-export { users };
+export { users, usersData };
