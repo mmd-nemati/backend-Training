@@ -22,19 +22,15 @@ users.post('/users', (req, res) => {
     if(error) return res.status(400).send(error.message);
     if(isDuplicate(req.body)) return res.status(400).send(`Username ${req.body.username} already exists.`);
 
-    const newUser = {
-        "name": req.body.name,
-        "username": req.body.username,
-        "age": req.body.age,
-        "id": usersData.length + 1
-    };
+    let newUser = req.body;
+    newUser.id = usersData.length + 1;
     usersData.push(newUser);
-    res.send(newUser);
 
+    res.send(newUser);
 });
 
 users.put('/users/:id', (req, res) => {
-    const user = usersData.find(u => u.id === parseInt(req.params.id));
+    const user = findUserById(req.params.id);
     if(!user) return res.status(404).send(`User with ID ${req.params.id} Not Found.`);
     const { error } = validateUser(req.body);
     if(error) return res.status(400).send(error.message);
@@ -44,7 +40,7 @@ users.put('/users/:id', (req, res) => {
 });
 
 users.delete('/users/:id', (req, res) => {
-    const user = usersData.find(u => u.id === parseInt(req.params.id));
+    const user = findUserById(req.params.id);
     if(!user) return res.status(404).send(`User with ID ${req.params.id} Not Found.`);
 
     let index = usersData.indexOf(user);
@@ -67,4 +63,8 @@ function isDuplicate(user) {
     return (usersData.find(u => u.username === user.username) !== undefined);
 }
 
-export { users, usersData };
+function findUserById(id) {
+    return usersData.find(u => u.id === parseInt(id));
+}
+
+export { users, usersData, findUserById };
