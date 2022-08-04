@@ -44,6 +44,16 @@ posts.put('/posts/:id', (req, res) => {
     res.send(post);
 });
 
+posts.delete('/posts/:id', (req, res) => {
+    const post = findPostById(req.params.id);
+    if(!post) return res.status(404).send(`Post with ID ${req.params.id} not found.`);
+
+    let index = postsData.indexOf(post);
+    postsData.splice(index, 1);
+
+    res.send(post);
+});
+
 function validatePost(post) {
     const schema = Joi.object({
         title: Joi.string().min(5).required(),
