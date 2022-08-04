@@ -39,6 +39,16 @@ likes.post('/likes', (req, res) => {
     res.status(201).send(newLike);
 });
 
+likes.delete('/likes/:id', (req, res) => {
+    const like = findLikeById(req.params.id);
+    if(!like) return res.status(404).send(`Like with id ${req.params.id} not found`);
+
+    let index = likesData.indexOf(like);
+    likesData.splice(index, 1);
+
+    res.send(like);
+});
+
 function validateLike(like) {
     const schema = Joi.object({
         userId: Joi.number().integer().required(),
