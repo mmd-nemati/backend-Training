@@ -1,4 +1,4 @@
-import { usersData, findUserById } from '../users/index.js';
+import { findUserById } from '../users/index.js';
 import express from 'express';
 import Joi from 'joi';
 
@@ -68,4 +68,4 @@ function findPostById(id) {
     return postsData.find(p => p.id === parseInt(id));
 }
 
-export { posts, postsData };
+export { posts, postsData, findPostById };
