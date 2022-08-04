@@ -31,6 +31,19 @@ posts.post('/posts', (req, res) => {
    res.send(newPost); 
 });
 
+posts.put('/posts/:id', (req, res) => {
+    const post = findPostById(req.params.id);
+    if(!post) return res.status(404).send(`Post with ID ${req.params.id} not found.`);
+    const { error } = validatePost(req.body);
+    if(error) return res.status(400).send(error.message);
+    const user = findUserById(req.body.userId);
+    if(!user) return res.status(404).send(`User with ID ${req.body.userId} Not Found.`);
+    if(post.userId !== req.body.userId) return res.status(400).send(`userId cannot be changed.`);
+
+    ({title: post.title, text: post.text} = req.body);
+    res.send(post);
+});
+
 function validatePost(post) {
     const schema = Joi.object({
         title: Joi.string().min(5).required(),
