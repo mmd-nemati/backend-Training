@@ -11,7 +11,7 @@ users.get('/users', (req, res) => {
 });
 
 users.get('/users/:id', (req, res) => {
-    const user = usersData.find(u => u.id === parseInt(req.params.id));
+    const user = findUserById(req.params.id);
     if(!user) return res.status(404).send(`User with ID ${req.params.id} Not Found.`);
 
     res.send(user);
@@ -20,13 +20,13 @@ users.get('/users/:id', (req, res) => {
 users.post('/users', (req, res) => {
     const { error } = validateUser(req.body);
     if(error) return res.status(400).send(error.message);
-    if(isDuplicate(req.body)) return res.status(400).send(`Username ${req.body.username} already exists.`);
+    if(isPostDuplicated(req.body)) return res.status(400).send(`Username ${req.body.username} already exists.`);
 
     let newUser = req.body;
     newUser.id = usersData.length + 1;
     usersData.push(newUser);
 
-    res.send(newUser);
+    res.status(201).send(newUser);
 });
 
 users.put('/users/:id', (req, res) => {
@@ -59,8 +59,8 @@ function validateUser(user) {
     return schema.validate(user);
 }
 
-function isDuplicate(user) {
-    return (usersData.find(u => u.username === user.username) !== undefined);
+function isPostDuplicated(user) {
+    return usersData.find(u => u.username === user.username) !== undefined;
 }
 
 function findUserById(id) {

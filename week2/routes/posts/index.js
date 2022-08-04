@@ -28,7 +28,7 @@ posts.post('/posts', (req, res) => {
     newPost.id = postsData.length + 1;
     postsData.push(newPost);
 
-   res.send(newPost); 
+   res.status(201).send(newPost); 
 });
 
 posts.put('/posts/:id', (req, res) => {
