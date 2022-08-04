@@ -19,8 +19,41 @@ likes.get('/likes/:id', (req, res) => {
     res.send(like);
 });
 
+likes.post('/likes', (req, res) => {
+    const { error } = validateLike(req.body);
+    if(error) return res.status(400).send(error.message);
+    const user = findUserById(req.body.userId);
+    if(!user) return res.status(404).send(`User with ID ${req.body.userId} not found.`)
+    const post = findPostById(req.body.postId);
+    if(!post) return res.status(404).send(`Post with ID ${req.body.postId} not found.`);
+
+    let newLike = req.body;
+    // Check if same user has liked same post.
+    // If does, don't create new like. just return the old like.
+    let dupLike = findDuplicatedLike(newLike);
+    if(dupLike) return res.status(200).send(dupLike);
+
+    newLike.id = likesData.length + 1;
+    likesData.push(newLike);
+
+    res.status(201).send(newLike);
+});
+
+function validateLike(like) {
+    const schema = Joi.object({
+        userId: Joi.number().integer().required(),
+        postId: Joi.number().integer().required()
+    });
+
+    return schema.validate(like);
+}
+
 function findLikeById(id) {
     return likesData.find(l => l.id === parseInt(id));
+}
+
+function findDuplicatedLike(like) {
+    return likesData.find(l => l.postId === like.postId && l.userId === like.userId);
 }
 
 export { likes };
