@@ -21,7 +21,7 @@ likes.get('/likes/:id', (req, res) => {
 });
 
 likes.post('/likes', (req, res) => {
-    const { error } = validateLike(req.body);
+    const { error } = validateLike(req.body, "post");
     if(error) return res.status(400).send(error.message);
     const user = findUserById(req.body.userId);
     if(!user) return res.status(404).send(`User with ID ${req.body.userId} not found.`)
@@ -34,10 +34,20 @@ likes.post('/likes', (req, res) => {
     let dupLike = findDuplicatedLike(newLike);
     if(dupLike) return res.status(200).send(dupLike);
 
-    newLike.id = likesDBid;
+    newLike.id = likesDBid++;
     likesData.push(newLike);
 
     res.status(201).send(newLike);
+});
+
+likes.put('/likes/:id', (req, res) => {
+    const like = findLikeById(req.params.id);
+    if(!like) return res.status(404).send(`Like with ID ${req.params.id} not found.`);
+    const { error } = validateLike(req.body, "put");
+    if(error) return res.status(400).send(error.message);
+
+    ({userId: like.userId = like.userId, postId: like.postId = like.postId} = req.body);
+    res.send(like);
 });
 
 likes.delete('/likes/:id', (req, res) => {
@@ -50,11 +60,19 @@ likes.delete('/likes/:id', (req, res) => {
     res.send(like);
 });
 
-function validateLike(like) {
-    const schema = Joi.object({
-        userId: Joi.number().integer().required(),
-        postId: Joi.number().integer().required()
-    });
+function validateLike(like, reqType) {
+    let schema;
+    if(reqType === "post") {
+        schema = Joi.object({
+            userId: Joi.number().integer().required(),
+            postId: Joi.number().integer().required()
+        });
+    } else if(reqType === "put") {
+        schema = Joi.object({
+            userId: Joi.number().integer(),
+            postId: Joi.number().integer()
+        });
+    } else return true;
 
     return schema.validate(like);
 }
