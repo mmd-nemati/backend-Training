@@ -5,6 +5,7 @@ const users = express();
 users.use(express.json());
 
 let usersData = [];
+let usersDBid = 1;
 
 users.get('/users', (req, res) => {
     res.send(usersData);
@@ -23,7 +24,7 @@ users.post('/users', (req, res) => {
     if(isPostDuplicated(req.body)) return res.status(400).send(`Username ${req.body.username} already exists.`);
 
     let newUser = req.body;
-    newUser.id = usersData.length + 1;
+    newUser.id = usersDBid++;
     usersData.push(newUser);
 
     res.status(201).send(newUser);

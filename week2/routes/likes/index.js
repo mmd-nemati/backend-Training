@@ -7,6 +7,7 @@ const likes = express();
 likes.use(express.json());
 
 let likesData = [];
+let likesDBid = 1;
 
 likes.get('/likes', (req, res) => {
     res.send(likesData);
@@ -33,7 +34,7 @@ likes.post('/likes', (req, res) => {
     let dupLike = findDuplicatedLike(newLike);
     if(dupLike) return res.status(200).send(dupLike);
 
-    newLike.id = likesData.length + 1;
+    newLike.id = likesDBid;
     likesData.push(newLike);
 
     res.status(201).send(newLike);

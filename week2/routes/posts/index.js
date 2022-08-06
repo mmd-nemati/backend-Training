@@ -6,6 +6,7 @@ const posts = express();
 posts.use(express.json());
 
 let postsData = [];
+let postsDBid = 1;
 
 posts.get('/posts', (req, res) => {
     res.send(postsData);
@@ -25,7 +26,7 @@ posts.post('/posts', (req, res) => {
     if(!user) return res.status(404).send(`User with ID ${req.body.userId} Not Found.`);
 
     let newPost = req.body;
-    newPost.id = postsData.length + 1;
+    newPost.id = postsDBid++;
     postsData.push(newPost);
 
    res.status(201).send(newPost); 
