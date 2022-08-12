@@ -61,21 +61,30 @@ users.post('/', async (req, res) => {
             return res.status(400).send(`Username '${err.keyValue.username}' already exists.`);
         if (err.code === 11000 && err.keyPattern.email === 1)
             return res.status(400).send(`Email '${err.keyValue.email}' already signed up.`);
+
         res.status(500).send(err);
     }
 });
 
-users.put('/:id', (req, res) => {
-    const user = findUserById(req.params.id);
-    if (!user) return res.status(404).send(`User with ID ${req.params.id} Not Found.`);
-    const { error } = validateUser(req.body, "put");
-    if (error) return res.status(400).send(error.message);
+users.put('/:id', async (req, res) => {
+    try {
+        const { error } = validatePutUser(req.body, "put");
+        if (error) return res.status(400).send(error.message);
+        const user = await User
+            .findOneAndUpdate({ _id: req.params.id }, lodash.pick(req.body,['name', 'username', 'age']), 
+                { new: true, runValidators: true });
+        if (!user) return res.status(404).send(`User with ID ${req.params.id} Not Found.`);
 
-    ({
-        name: user.name = user.name, username: user.username = user.username,
-        age: user.age = user.age
-    } = req.body);
-    res.send(user);
+        res.status(200).send(lodash.pick(user, ['name', 'username', 'age']));
+    }
+    catch (err) {
+        if (err.name === "ValidationError")
+            return res.status(400).send(err.message);
+        if (err.code === 11000 && err.keyPattern.username === 1)
+            return res.status(400).send(`Username '${err.keyValue.username}' already exists.`);
+
+        res.status(500).send(err);
+    }
 });
 
 users.delete('/:id', (req, res) => {
