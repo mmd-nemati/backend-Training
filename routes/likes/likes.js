@@ -1,5 +1,5 @@
-import { findUserById } from '../users/index.js';
-import { findPostById } from '../posts/index.js';
+import { findUserById } from '../users/users.js';
+import { findPostById } from '../posts/posts.js';
 import express from 'express';
 import Joi from 'joi';
 

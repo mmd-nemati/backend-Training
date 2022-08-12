@@ -1,7 +1,7 @@
 import express from 'express';
-import { users } from './users/index.js';
-import { posts } from './posts/index.js';
-import { likes } from './likes/index.js';
+import { users } from './users/users.js';
+import { posts } from './posts/posts.js';
+import { likes } from './likes/likes.js';
 
 const routes = express();
 routes.use('/api', users);

@@ -1,4 +1,4 @@
-import { findUserById } from '../users/index.js';
+import { findUserById } from '../users/users.js';
 import express from 'express';
 import Joi from 'joi';
 
