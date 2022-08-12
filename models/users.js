@@ -58,7 +58,7 @@ const userSchema = new mongoose.Schema({
 const User = mongoose.model('User', userSchema);
 
 function validatePostUser(user) {
-    let schema = Joi.object({ 
+    let schema = Joi.object({
         name: Joi.string().required(),
         username: Joi.string().min(5).required(),
         age: Joi.number().integer().min(14).required(),
@@ -71,7 +71,7 @@ function validatePostUser(user) {
 }
 
 function validatePutUser(user) {
-   let schema = Joi.object({ 
+    let schema = Joi.object({
         name: Joi.string(),
         username: Joi.string().min(5),
         age: Joi.number().integer().min(14),

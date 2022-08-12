@@ -15,24 +15,24 @@ likes.get('/likes', (req, res) => {
 
 likes.get('/likes/:id', (req, res) => {
     const like = findLikeById(req.params.id);
-    if(!like) return res.status(404).send(`Like with ID ${req.params.id} not found.`);
+    if (!like) return res.status(404).send(`Like with ID ${req.params.id} not found.`);
 
     res.send(like);
 });
 
 likes.post('/likes', (req, res) => {
     const { error } = validateLike(req.body, "post");
-    if(error) return res.status(400).send(error.message);
+    if (error) return res.status(400).send(error.message);
     const user = findUserById(req.body.userId);
-    if(!user) return res.status(404).send(`User with ID ${req.body.userId} not found.`)
+    if (!user) return res.status(404).send(`User with ID ${req.body.userId} not found.`)
     const post = findPostById(req.body.postId);
-    if(!post) return res.status(404).send(`Post with ID ${req.body.postId} not found.`);
+    if (!post) return res.status(404).send(`Post with ID ${req.body.postId} not found.`);
 
     let newLike = req.body;
     // Check if same user has liked same post.
     // If does, don't create new like. just return the old like.
     let dupLike = findDuplicatedLike(newLike);
-    if(dupLike) return res.status(200).send(dupLike);
+    if (dupLike) return res.status(200).send(dupLike);
 
     newLike.id = likesDBid++;
     likesData.push(newLike);
@@ -42,17 +42,17 @@ likes.post('/likes', (req, res) => {
 
 likes.put('/likes/:id', (req, res) => {
     const like = findLikeById(req.params.id);
-    if(!like) return res.status(404).send(`Like with ID ${req.params.id} not found.`);
+    if (!like) return res.status(404).send(`Like with ID ${req.params.id} not found.`);
     const { error } = validateLike(req.body, "put");
-    if(error) return res.status(400).send(error.message);
+    if (error) return res.status(400).send(error.message);
 
-    ({userId: like.userId = like.userId, postId: like.postId = like.postId} = req.body);
+    ({ userId: like.userId = like.userId, postId: like.postId = like.postId } = req.body);
     res.send(like);
 });
 
 likes.delete('/likes/:id', (req, res) => {
     const like = findLikeById(req.params.id);
-    if(!like) return res.status(404).send(`Like with id ${req.params.id} not found`);
+    if (!like) return res.status(404).send(`Like with id ${req.params.id} not found`);
 
     let index = likesData.indexOf(like);
     likesData.splice(index, 1);
@@ -62,12 +62,12 @@ likes.delete('/likes/:id', (req, res) => {
 
 function validateLike(like, reqType) {
     let schema;
-    if(reqType === "post") {
+    if (reqType === "post") {
         schema = Joi.object({
             userId: Joi.number().integer().required(),
             postId: Joi.number().integer().required()
         });
-    } else if(reqType === "put") {
+    } else if (reqType === "put") {
         schema = Joi.object({
             userId: Joi.number().integer(),
             postId: Joi.number().integer()

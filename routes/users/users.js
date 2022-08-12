@@ -16,30 +16,32 @@ users.get('/users', async (req, res) => {
         let pageSize = req.params.pageSize ? parseInt(req.params.pageSize) : 10;
 
         const users = await User
-                        .find()
-                        .sort(sortParam)
-                        .select('username age')
-                        .skip((pageNumber - 1) * pageSize)
-                        .limit(pageSize)
+            .find()
+            .sort(sortParam)
+            .select('username age')
+            .skip((pageNumber - 1) * pageSize)
+            .limit(pageSize)
 
         res.send(users);
     }
-    catch(err) {
+    catch (err) {
         res.status(500).send(err.message)
     }
 });
 
-users.get('/users/:id', (req, res) => {
-    const user = findUserById(req.params.id);
-    if(!user) return res.status(404).send(`User with ID ${req.params.id} Not Found.`);
+users.get('/users/:id', async (req, res) => {
+    {
+        const user = findUserById(req.params.id);
+        if (!user) return res.status(404).send(`User with ID ${req.params.id} Not Found.`);
 
-    res.send(user);
+        res.send(user);
+    }
 });
 
 users.post('/users', (req, res) => {
     const { error } = validateUser(req.body, "post");
-    if(error) return res.status(400).send(error.message);
-    if(isPostDuplicated(req.body)) return res.status(400).send(`Username ${req.body.username} already exists.`);
+    if (error) return res.status(400).send(error.message);
+    if (isPostDuplicated(req.body)) return res.status(400).send(`Username ${req.body.username} already exists.`);
 
     let newUser = req.body;
     newUser.id = usersDBid++;
@@ -50,18 +52,20 @@ users.post('/users', (req, res) => {
 
 users.put('/users/:id', (req, res) => {
     const user = findUserById(req.params.id);
-    if(!user) return res.status(404).send(`User with ID ${req.params.id} Not Found.`);
+    if (!user) return res.status(404).send(`User with ID ${req.params.id} Not Found.`);
     const { error } = validateUser(req.body, "put");
-    if(error) return res.status(400).send(error.message);
+    if (error) return res.status(400).send(error.message);
 
-    ({ name: user.name = user.name, username: user.username = user.username,
-         age: user.age = user.age } = req.body);
+    ({
+        name: user.name = user.name, username: user.username = user.username,
+        age: user.age = user.age
+    } = req.body);
     res.send(user);
 });
 
 users.delete('/users/:id', (req, res) => {
     const user = findUserById(req.params.id);
-    if(!user) return res.status(404).send(`User with ID ${req.params.id} Not Found.`);
+    if (!user) return res.status(404).send(`User with ID ${req.params.id} Not Found.`);
 
     let index = usersData.indexOf(user);
     usersData.splice(index, 1);
@@ -71,14 +75,14 @@ users.delete('/users/:id', (req, res) => {
 
 function validateUser(user, reqType) {
     let schema;
-    if(reqType === "post") {
-        schema = Joi.object({ 
+    if (reqType === "post") {
+        schema = Joi.object({
             name: Joi.string().required(),
             username: Joi.string().min(5).required(),
             age: Joi.number().integer().min(14).required()
         });
-    } else if(reqType === "put") {
-        schema = Joi.object({ 
+    } else if (reqType === "put") {
+        schema = Joi.object({
             name: Joi.string(),
             username: Joi.string().min(5),
             age: Joi.number().integer().min(14)
