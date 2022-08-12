@@ -1,14 +1,32 @@
 import express from 'express';
 import Joi from 'joi';
-import { indexOf } from 'underscore';
+import { User, validatePostUser, validatePutUser } from '../../models/users.js';
+import { setSortOptins } from '../helper.js';
+
 const users = express();
 users.use(express.json());
 
 let usersData = [];
 let usersDBid = 1;
 
-users.get('/users', (req, res) => {
-    res.send(usersData);
+users.get('/users', async (req, res) => {
+    try {
+        let sortParam = setSortOptins(req.query);
+        let pageNumber = req.params.pageNumber ? parseInt(req.params.pageNumber) : 1;
+        let pageSize = req.params.pageSize ? parseInt(req.params.pageSize) : 10;
+
+        const users = await User
+                        .find()
+                        .sort(sortParam)
+                        .select('username age')
+                        .skip((pageNumber - 1) * pageSize)
+                        .limit(pageSize)
+
+        res.send(users);
+    }
+    catch(err) {
+        res.status(500).send(err.message)
+    }
 });
 
 users.get('/users/:id', (req, res) => {
