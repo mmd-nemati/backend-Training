@@ -62,7 +62,8 @@ users.post('/users', async (req, res) => {
             return res.status(400).send(err.message);
         if (err.code === 11000 && err.keyPattern.username === 1)
             return res.status(400).send(`Username '${err.keyValue.username}' already exists.`);
-
+        if (err.code === 11000 && err.keyPattern.email === 1)
+            return res.status(400).send(`Email '${err.keyValue.email}' already signed up.`);
         res.status(500).send(err);
     }
 });
