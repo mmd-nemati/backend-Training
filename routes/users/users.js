@@ -1,5 +1,6 @@
 import express from 'express';
 import Joi from 'joi';
+import lodash from 'lodash';
 import { User, validatePostUser, validatePutUser } from '../../models/user/user.js';
 import { setSortOptins } from '../helper.js';
 
@@ -48,14 +49,10 @@ users.post('/', async (req, res) => {
         const { error } = validatePostUser(req.body);
         if (error) return res.status(400).send(error.message);
 
-        let newUser = new User(req.body);
+        let newUser = new User(lodash.pick(req.body, ['name', 'username', 'email', 'password', 'age', 'phoneNumber']));
         newUser = await newUser.save();
 
-        res.status(201).send({
-            name: newUser.name,
-            username: newUser.username,
-            created_at: newUser.created_at
-        });
+        res.status(201).send(lodash.pick(newUser, ['name', 'username', 'created_at']));
     }
     catch (err) {
         if (err.name === "ValidationError")
