@@ -18,9 +18,9 @@ users.get('/users', async (req, res) => {
         const users = await User
             .find()
             .sort(sortParam)
-            .select('username age')
+            .select('name username age created_at -_id')
             .skip((pageNumber - 1) * pageSize)
-            .limit(pageSize)
+            .limit(pageSize);
 
         res.send(users);
     }
@@ -30,11 +30,16 @@ users.get('/users', async (req, res) => {
 });
 
 users.get('/users/:id', async (req, res) => {
-    {
-        const user = findUserById(req.params.id);
+    try {
+        const user = await User
+            .findById(req.params.id)
+            .select('name username age created_at -_id');
         if (!user) return res.status(404).send(`User with ID ${req.params.id} Not Found.`);
 
         res.send(user);
+    }
+    catch (err) {
+        res.status(500).send(err.message);
     }
 });
 
