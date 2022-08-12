@@ -1,0 +1,4 @@
+{
+    "dbpath": "mongodb://localhost/Moria",
+    "name": "Express app - development"
+}
