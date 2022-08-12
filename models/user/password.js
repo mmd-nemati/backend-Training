@@ -1,6 +1,5 @@
 import bcrypt from 'bcryptjs';
 import { UserSchema } from './schema.js';
-// import mongoose from 'mongoose';
 
 UserSchema.pre("save", function (next) {
     const user = this
@@ -23,6 +22,17 @@ UserSchema.pre("save", function (next) {
     } else {
         return next()
     }
-})
+});
+
+UserSchema.methods.comparePassword = async function(password) {
+    bcrypt.compare(password, this.password, function(error, isMatch) {
+        return (error ? error : isMatch);
+    //   if (error) {
+    //     return error;
+    //   } else {
+    //     return isMatch;
+    //   }
+    })
+  }
 
 export { UserSchema };

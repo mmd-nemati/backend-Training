@@ -1,6 +1,6 @@
 import express from 'express';
 import Joi from 'joi';
-import { User, validatePostUser, validatePutUser } from '../../models/users.js';
+import { User, validatePostUser, validatePutUser } from '../../models/user/user.js';
 import { setSortOptins } from '../helper.js';
 
 const users = express();
@@ -43,16 +43,28 @@ users.get('/users/:id', async (req, res) => {
     }
 });
 
-users.post('/users', (req, res) => {
-    const { error } = validateUser(req.body, "post");
-    if (error) return res.status(400).send(error.message);
-    if (isPostDuplicated(req.body)) return res.status(400).send(`Username ${req.body.username} already exists.`);
+users.post('/users', async (req, res) => {
+    try {
+        const { error } = validatePostUser(req.body);
+        if (error) return res.status(400).send(error.message);
 
-    let newUser = req.body;
-    newUser.id = usersDBid++;
-    usersData.push(newUser);
+        let newUser = new User(req.body);
+        newUser = await newUser.save();
 
-    res.status(201).send(newUser);
+        res.status(201).send({
+            name: newUser.name,
+            username: newUser.username,
+            created_at: newUser.created_at
+        });
+    }
+    catch (err) {
+        if (err.name === "ValidationError")
+            return res.status(400).send(err.message);
+        if (err.code === 11000 && err.keyPattern.username === 1)
+            return res.status(400).send(`Username '${err.keyValue.username}' already exists.`);
+
+        res.status(500).send(err);
+    }
 });
 
 users.put('/users/:id', (req, res) => {
