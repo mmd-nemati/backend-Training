@@ -8,18 +8,18 @@ posts.use(express.json());
 let postsData = [];
 let postsDBid = 1;
 
-posts.get('/posts', (req, res) => {
+posts.get('/', (req, res) => {
     res.send(postsData);
 });
 
-posts.get('/posts/:id', (req, res) => {
+posts.get('/:id', (req, res) => {
     const post = findPostById(req.params.id);
     if (!post) return res.status(404).send(`Post with ID ${req.params.id} not found.`);
 
     res.send(post);
 });
 
-posts.post('/posts', (req, res) => {
+posts.post('/', (req, res) => {
     const { error } = validatePost(req.body, "post");
     if (error) return res.status(400).send(error.message);
     const user = findUserById(req.body.userId);
@@ -32,7 +32,7 @@ posts.post('/posts', (req, res) => {
     res.status(201).send(newPost);
 });
 
-posts.put('/posts/:id', (req, res) => {
+posts.put('/:id', (req, res) => {
     const post = findPostById(req.params.id);
     if (!post) return res.status(404).send(`Post with ID ${req.params.id} not found.`);
     const { error } = validatePost(req.body, "put");
@@ -45,7 +45,7 @@ posts.put('/posts/:id', (req, res) => {
     res.send(post);
 });
 
-posts.delete('/posts/:id', (req, res) => {
+posts.delete('/:id', (req, res) => {
     const post = findPostById(req.params.id);
     if (!post) return res.status(404).send(`Post with ID ${req.params.id} not found.`);
 

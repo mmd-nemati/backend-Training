@@ -9,7 +9,7 @@ users.use(express.json());
 let usersData = [];
 let usersDBid = 1;
 
-users.get('/users', async (req, res) => {
+users.get('/', async (req, res) => {
     try {
         let sortParam = setSortOptins(req.query);
         let pageNumber = req.params.pageNumber ? parseInt(req.params.pageNumber) : 1;
@@ -29,7 +29,7 @@ users.get('/users', async (req, res) => {
     }
 });
 
-users.get('/users/:id', async (req, res) => {
+users.get('/:id', async (req, res) => {
     try {
         const user = await User
             .findById(req.params.id)
@@ -43,7 +43,7 @@ users.get('/users/:id', async (req, res) => {
     }
 });
 
-users.post('/users', async (req, res) => {
+users.post('/', async (req, res) => {
     try {
         const { error } = validatePostUser(req.body);
         if (error) return res.status(400).send(error.message);
@@ -68,7 +68,7 @@ users.post('/users', async (req, res) => {
     }
 });
 
-users.put('/users/:id', (req, res) => {
+users.put('/:id', (req, res) => {
     const user = findUserById(req.params.id);
     if (!user) return res.status(404).send(`User with ID ${req.params.id} Not Found.`);
     const { error } = validateUser(req.body, "put");
@@ -81,7 +81,7 @@ users.put('/users/:id', (req, res) => {
     res.send(user);
 });
 
-users.delete('/users/:id', (req, res) => {
+users.delete('/:id', (req, res) => {
     const user = findUserById(req.params.id);
     if (!user) return res.status(404).send(`User with ID ${req.params.id} Not Found.`);
 

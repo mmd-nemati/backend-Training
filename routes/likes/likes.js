@@ -9,18 +9,18 @@ likes.use(express.json());
 let likesData = [];
 let likesDBid = 1;
 
-likes.get('/likes', (req, res) => {
+likes.get('/', (req, res) => {
     res.send(likesData);
 });
 
-likes.get('/likes/:id', (req, res) => {
+likes.get('/:id', (req, res) => {
     const like = findLikeById(req.params.id);
     if (!like) return res.status(404).send(`Like with ID ${req.params.id} not found.`);
 
     res.send(like);
 });
 
-likes.post('/likes', (req, res) => {
+likes.post('/', (req, res) => {
     const { error } = validateLike(req.body, "post");
     if (error) return res.status(400).send(error.message);
     const user = findUserById(req.body.userId);
@@ -40,7 +40,7 @@ likes.post('/likes', (req, res) => {
     res.status(201).send(newLike);
 });
 
-likes.put('/likes/:id', (req, res) => {
+likes.put('/:id', (req, res) => {
     const like = findLikeById(req.params.id);
     if (!like) return res.status(404).send(`Like with ID ${req.params.id} not found.`);
     const { error } = validateLike(req.body, "put");
@@ -50,7 +50,7 @@ likes.put('/likes/:id', (req, res) => {
     res.send(like);
 });
 
-likes.delete('/likes/:id', (req, res) => {
+likes.delete('/:id', (req, res) => {
     const like = findLikeById(req.params.id);
     if (!like) return res.status(404).send(`Like with id ${req.params.id} not found`);
 

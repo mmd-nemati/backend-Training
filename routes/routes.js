@@ -4,9 +4,9 @@ import { posts } from './posts/posts.js';
 import { likes } from './likes/likes.js';
 
 const routes = express();
-routes.use('/api', users);
-routes.use('/api', posts);
-routes.use('/api', likes);
+routes.use('/api/users', users);
+routes.use('/api/posts', posts);
+routes.use('/api/likes', likes);
 
 
 export { routes };
