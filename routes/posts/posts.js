@@ -32,11 +32,20 @@ posts.get('/', async (req, res) => {
     }
 });
 
-posts.get('/:id', (req, res) => {
-    const post = findPostById(req.params.id);
-    if (!post) return res.status(404).send(`Post with ID ${req.params.id} not found.`);
+posts.get('/:id', async (req, res) => {
+    try {
+        const post = await Post
+            .findById(req.params.id)
+            .populate('user', 'name username  -_id')
+            // .populate('likes', '')
+            .select('title text user likes created_at -_id')
+        if (!post) return res.status(404).send(`Post with ID ${req.params.id} not found.`);
 
-    res.send(post);
+        res.send(post);
+    }
+    catch (err) {
+        res.status(500).send(err);
+    }
 });
 
 posts.post('/', (req, res) => {
