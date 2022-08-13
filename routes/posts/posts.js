@@ -1,6 +1,8 @@
-import { findUserById } from '../users/users.js';
 import express from 'express';
 import Joi from 'joi';
+import { Post } from '../../models/post/post.js';
+import { findUserById } from '../users/users.js';
+import { setSortOptins } from '../helper.js';
 
 const posts = express();
 posts.use(express.json());
@@ -8,8 +10,26 @@ posts.use(express.json());
 let postsData = [];
 let postsDBid = 1;
 
-posts.get('/', (req, res) => {
-    res.send(postsData);
+posts.get('/', async (req, res) => {
+    try {
+        let sortParam = setSortOptins(req.query);
+        let pageNumber = req.params.pageNumber ? parseInt(req.params.pageNumber) : 1;
+        let pageSize = req.params.pageSize ? parseInt(req.params.pageSize) : 10;
+
+        const posts = await Post
+            .find()
+            .populate('user', 'name username  -_id')
+            // .populate('likes', '')
+            .select('title text user likes created_at -_id')
+            .sort(sortParam)
+            .skip((pageNumber - 1) * pageSize)
+            .limit(pageSize);
+
+        res.send(posts);
+    }
+    catch (err) {
+        res.status(500).send(err);
+    }
 });
 
 posts.get('/:id', (req, res) => {

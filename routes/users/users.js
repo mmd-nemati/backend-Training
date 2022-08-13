@@ -21,8 +21,8 @@ users.get('/', async (req, res) => {
 
         const users = await User
             .find()
-            .sort(sortParam)
             .select('name username age created_at -_id')
+            .sort(sortParam)
             .skip((pageNumber - 1) * pageSize)
             .limit(pageSize);
 

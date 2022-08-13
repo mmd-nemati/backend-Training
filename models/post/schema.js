@@ -13,12 +13,12 @@ const PostSchema = mongoose.Schema({
         minLength: 3,
         maxLength: 255
     },
-    userId: {
+    user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
-    likesId: {
+    likes: {
         type: [mongoose.Schema.Types.ObjectId],
         ref: 'Like'
     },
