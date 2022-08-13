@@ -95,9 +95,14 @@ users.put('/:id', auth, async (req, res) => {
     }
 });
 
-users.delete('/:id', async (req, res) => {
+users.delete('/:id', auth, async (req, res) => {
     try {
-        const user = await User.findByIdAndRemove(req.params.id, { new: true });
+        let user = await User.findById(req.params.id)
+            .select('-password -created_at');
+        if (!user) return res.status(404).send(`User with ID ${req.params.id} Not Found.`);
+        if (req.user._id !== user.id) return res.status(403).send(`Access denied.`);
+        
+        user = await User.findByIdAndRemove(req.params.id, { new: true });
         if (!user) return res.status(404).send(`User with ID ${req.params.id} Not Found.`);
 
         res.status(200).send(`${user.username} was deleted successfully.`);
