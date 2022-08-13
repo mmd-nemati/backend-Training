@@ -1,8 +1,11 @@
 import express from 'express';
 import Joi from 'joi';
+import jwt from 'jsonwebtoken';
+import config from 'config';
 import lodash from 'lodash';
 import { User, validatePostUser, validatePutUser } from '../../models/user/user.js';
 import { setSortOptins } from '../helper.js';
+import { auth } from '../../middlewares/auth.js';
 
 const users = express();
 users.use(express.json());
@@ -49,10 +52,12 @@ users.post('/', async (req, res) => {
         const { error } = validatePostUser(req.body);
         if (error) return res.status(400).send(error.message);
 
-        let newUser = new User(lodash.pick(req.body, ['name', 'username', 'email', 'password', 'age', 'phoneNumber']));
-        newUser = await newUser.save();
+        let user = new User(lodash.pick(req.body, ['name', 'username', 'email', 'password', 'age', 'phoneNumber']));
+        user = await user.save();
 
-        res.status(201).send(lodash.pick(newUser, ['name', 'username', 'created_at']));
+        let token = user.generateAuthToken();
+
+        res.header(config.get('authTokenName'), token).status(201).send(lodash.pick(user, ['name', 'username', 'created_at']));
     }
     catch (err) {
         if (err.name === "ValidationError")
@@ -62,18 +67,21 @@ users.post('/', async (req, res) => {
         if (err.code === 11000 && err.keyPattern.email === 1)
             return res.status(400).send(`Email '${err.keyValue.email}' already signed up.`);
 
-        res.status(500).send(err);
+        res.status(500).send(err.message);
     }
 });
 
-users.put('/:id', async (req, res) => {
+users.put('/:id', auth, async (req, res) => {
     try {
         const { error } = validatePutUser(req.body, "put");
         if (error) return res.status(400).send(error.message);
-        const user = await User
-            .findOneAndUpdate({ _id: req.params.id }, lodash.pick(req.body, ['name', 'username', 'age']),
-                { new: true, runValidators: true });
+        let user = await User.findById(req.params.id)
+            .select('-password -created_at');
         if (!user) return res.status(404).send(`User with ID ${req.params.id} Not Found.`);
+        if (req.user._id !== user.id) return res.status(403).send(`Access denied.`);
+
+        user = await User.findOneAndUpdate({ _id: req.params.id }, lodash.pick(req.body, ['name', 'username', 'age', '_id']),
+            { new: true, runValidators: true });
 
         res.status(200).send(lodash.pick(user, ['name', 'username', 'age']));
     }

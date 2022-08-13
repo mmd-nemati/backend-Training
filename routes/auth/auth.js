@@ -13,8 +13,8 @@ auth.post('/', async (req, res) => {
         const user = await User.findOne({ $or: [{ email: req.body.email }, { username: req.body.username }] })
             // .populate('posts');
         if (!user) return res.status(400).send(`Invalid credentials.`);
-
-        const valid = bcrypt.compare(req.body.password, user.password);
+        
+        const valid = await bcrypt.compare(req.body.password, user.password);
         if (!valid) return res.status(400).send(`Invalid credentials.`);
 
         let token = user.generateAuthToken();
