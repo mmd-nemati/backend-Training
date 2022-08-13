@@ -71,7 +71,7 @@ users.put('/:id', async (req, res) => {
         const { error } = validatePutUser(req.body, "put");
         if (error) return res.status(400).send(error.message);
         const user = await User
-            .findOneAndUpdate({ _id: req.params.id }, lodash.pick(req.body,['name', 'username', 'age']), 
+            .findOneAndUpdate({ _id: req.params.id }, lodash.pick(req.body, ['name', 'username', 'age']),
                 { new: true, runValidators: true });
         if (!user) return res.status(404).send(`User with ID ${req.params.id} Not Found.`);
 
@@ -87,14 +87,16 @@ users.put('/:id', async (req, res) => {
     }
 });
 
-users.delete('/:id', (req, res) => {
-    const user = findUserById(req.params.id);
-    if (!user) return res.status(404).send(`User with ID ${req.params.id} Not Found.`);
+users.delete('/:id', async (req, res) => {
+    try {
+        const user = await User.findByIdAndRemove(req.params.id, { new: true });
+        if (!user) return res.status(404).send(`User with ID ${req.params.id} Not Found.`);
 
-    let index = usersData.indexOf(user);
-    usersData.splice(index, 1);
-
-    res.send(user);
+        res.status(200).send(`${user.username} was deleted successfully.`);
+    }
+    catch (err) {
+        res.status(500).send(err);
+    }
 });
 
 function validateUser(user, reqType) {
