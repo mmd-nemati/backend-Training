@@ -8,7 +8,6 @@ function auth(req, res, next) {
 
         const payload = jwt.decode(token, config.get('jwtPrivateKey'), { complete: true });
         req.user = payload;
-        console.log(req.user);
         next();
     }
     catch (err) {
