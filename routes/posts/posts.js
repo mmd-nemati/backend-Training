@@ -1,8 +1,13 @@
 import express from 'express';
 import Joi from 'joi';
+import config from 'config';
+import lodash from 'lodash';
 import { Post } from '../../models/post/post.js';
 import { findUserById } from '../users/users.js';
 import { setSortOptins } from '../helper.js';
+import { auth } from '../../middlewares/auth.js';
+import { validatePostPost, validatePutPost } from '../../models/post/validate.js'
+import { User } from '../../models/user/user.js';
 
 const posts = express();
 posts.use(express.json());
@@ -48,17 +53,30 @@ posts.get('/:id', async (req, res) => {
     }
 });
 
-posts.post('/', (req, res) => {
-    const { error } = validatePost(req.body, "post");
-    if (error) return res.status(400).send(error.message);
-    const user = findUserById(req.body.userId);
-    if (!user) return res.status(404).send(`User with ID ${req.body.userId} Not Found.`);
+posts.post('/', auth, async (req, res) => {
+    try {
+        const { error } = validatePostPost(req.body);
+        if (error) return res.status(400).send(error.message);
 
-    let newPost = req.body;
-    newPost.id = postsDBid++;
-    postsData.push(newPost);
+        let post = new Post(lodash.pick(req.body, ['title', 'text']));
+        post.user = req.user._id;
+        post = await post.populate('user', 'name username -_id');
+        if (!post.user) return res.status(401).send(`Invalid token.`);
+        post = await post.save();
 
-    res.status(201).send(newPost);
+        await User.findByIdAndUpdate(req.user._id, {
+            $push: {
+                posts: post._id
+            }
+        })
+
+        res.status(201).send(lodash.pick(post, ['text', 'title', 'user', 'created_at']));
+    }
+    catch (err) {
+        if (err.name === "ValidationError")
+            return res.status(400).send(err);
+        res.status(500).send(err);
+    }
 });
 
 posts.put('/:id', (req, res) => {
