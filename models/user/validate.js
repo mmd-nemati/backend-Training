@@ -33,4 +33,15 @@ function validatePutUser(user) {
     return schema.validate(user);
 }
 
-export { validatePostUser, validatePutUser };
+function validateAuthUser(user) {
+    let schema = Joi.object({
+        username: Joi.string().max(255),
+        email: Joi.string().max(255).email(),
+        password: Joi.string().max(255).required()
+    }).or('username', 'email');
+
+    return schema.validate(user);
+
+}
+
+export { validatePostUser, validatePutUser, validateAuthUser };
