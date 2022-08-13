@@ -1,0 +1,4 @@
+{
+    "jwtPrivateKey": "",
+    "authTokenName": "x-auth-token"
+}
