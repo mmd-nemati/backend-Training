@@ -109,14 +109,21 @@ posts.put('/:id', auth, async (req, res) => {
     }
 });
 
-posts.delete('/:id', (req, res) => {
-    const post = findPostById(req.params.id);
-    if (!post) return res.status(404).send(`Post with ID ${req.params.id} not found.`);
+posts.delete('/:id', auth, async (req, res) => {
+    try {
+        let post = await Post.findById(req.params.id)
+            .select('user')
+            .populate('user', 'id');
+        if (!post) return res.status(404).send(`Post with ID ${req.params.id} not found.`);
+        if (req.user._id !== post.user.id) return res.status(403).send('Access denied.');
 
-    let index = postsData.indexOf(post);
-    postsData.splice(index, 1);
+        post = await Post.findByIdAndRemove(req.params.id, { new: true });
 
-    res.send(post);
+        res.status(200).send(`Post deleted successfully.`);
+    }
+    catch (err) {
+        res.status(500).send(err.message);
+    }
 });
 
 function validatePost(post, reqType) {
