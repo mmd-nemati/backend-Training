@@ -79,17 +79,34 @@ posts.post('/', auth, async (req, res) => {
     }
 });
 
-posts.put('/:id', (req, res) => {
-    const post = findPostById(req.params.id);
-    if (!post) return res.status(404).send(`Post with ID ${req.params.id} not found.`);
-    const { error } = validatePost(req.body, "put");
-    if (error) return res.status(400).send(error.message);
-    const user = findUserById(req.body.userId || post.userId);
-    if (!user) return res.status(404).send(`User with ID ${req.body.userId} Not Found.`);
-    if (req.body.userId && post.userId !== parseInt(req.body.userId)) return res.status(400).send(`userId cannot be changed.`);
+posts.put('/:id', auth, async (req, res) => {
+    try {
+        let post = await Post
+            .findById(req.params.id)
+            .select('title text user')
+            .populate('user', 'id');
+        if (!post) return res.status(404).send(`Post with ID ${req.params.id} not found.`);
+        const { error } = validatePutPost(req.body);
+        if (error) return res.status(400).send(error.message);
+        if (req.user._id !== post.user.id) return res.status(403).send('Access denied.');
 
-    ({ title: post.title = post.title, text: post.text = post.text } = req.body);
-    res.send(post);
+        post = await Post
+            .findOneAndUpdate({ _id: req.params.id }, {
+                ...lodash.pick(req.body, ['text', 'title']),
+                $push: {
+                    updated_at: Date.now()
+                }
+            }, { new: true, runValidators: true })
+            .populate('user', 'name username -_id');
+
+        res.send(lodash.pick(post, ['text', 'title', 'user', 'updated_at']));
+    }
+    catch (err) {
+        if (err.name === "ValidationError")
+            return res.status(400).send(err.message);
+
+        res.status(500).send(err.message);
+    }
 });
 
 posts.delete('/:id', (req, res) => {
