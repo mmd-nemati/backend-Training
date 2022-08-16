@@ -112,29 +112,6 @@ users.delete('/:id', auth, async (req, res) => {
     }
 });
 
-function validateUser(user, reqType) {
-    let schema;
-    if (reqType === "post") {
-        schema = Joi.object({
-            name: Joi.string().required(),
-            username: Joi.string().min(5).required(),
-            age: Joi.number().integer().min(14).required()
-        });
-    } else if (reqType === "put") {
-        schema = Joi.object({
-            name: Joi.string(),
-            username: Joi.string().min(5),
-            age: Joi.number().integer().min(14)
-        });
-    } else return true;
-
-    return schema.validate(user);
-}
-
-function isPostDuplicated(user) {
-    return usersData.find(u => u.username === user.username) !== undefined;
-}
-
 function findUserById(id) {
     return usersData.find(u => u.id === parseInt(id));
 }

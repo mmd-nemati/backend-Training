@@ -27,12 +27,7 @@ UserSchema.pre("save", function (next) {
 UserSchema.methods.comparePassword = async function(password) {
     bcrypt.compare(password, this.password, function(error, isMatch) {
         return (error ? error : isMatch);
-    //   if (error) {
-    //     return error;
-    //   } else {
-    //     return isMatch;
-    //   }
-    })
+    });
   }
 
 export { UserSchema };

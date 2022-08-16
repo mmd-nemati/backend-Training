@@ -126,25 +126,6 @@ posts.delete('/:id', auth, async (req, res) => {
     }
 });
 
-function validatePost(post, reqType) {
-    let schema;
-    if (reqType === "post") {
-        schema = Joi.object({
-            title: Joi.string().min(5).required(),
-            text: Joi.string().min(5).required(),
-            userId: Joi.number().integer().required()
-        });
-    } else if (reqType === "put") {
-        schema = Joi.object({
-            title: Joi.string().min(5),
-            text: Joi.string().min(5),
-            userId: Joi.number().integer()
-        });
-    } else return true;
-
-    return schema.validate(post);
-}
-
 function findPostById(id) {
     return postsData.find(p => p.id === parseInt(id));
 }
