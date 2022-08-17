@@ -82,6 +82,10 @@ likes.post('/', authn, async (req, res) => {
     }
 });
 
+// As of now, I don't see any reason for that the Like entity 
+// should have a PUT route. So this is commented out until 
+// I figure out what the heck to do with it.
+/*
 likes.put('/:id', (req, res) => {
     const like = findLikeById(req.params.id);
     if (!like) return res.status(404).send(`Like with ID ${req.params.id} not found.`);
@@ -91,6 +95,7 @@ likes.put('/:id', (req, res) => {
     ({ userId: like.userId = like.userId, postId: like.postId = like.postId } = req.body);
     res.send(like);
 });
+*/
 
 likes.delete('/:id', (req, res) => {
     const like = findLikeById(req.params.id);
