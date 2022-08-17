@@ -12,15 +12,42 @@ likes.use(express.json());
 let likesData = [];
 let likesDBid = 1;
 
-likes.get('/', (req, res) => {
-    res.send(likesData);
+likes.get('/', async (req, res) => {
+    try {
+        let sortParam = setSortOptins(req.query);
+        let pageNumber = req.query.pageNumber ? parseInt(req.query.pageNumber) : 1;
+        let pageSize = req.query.pageSize ? parseInt(req.query.pageSize) : 10;
+
+        const likes = await Like
+            .find()
+            .populate('user', 'username  -_id')
+            .populate('post', 'title _id')
+            .select('user post createdAt -_id')
+            .sort(sortParam)
+            .skip((pageNumber - 1) * pageSize)
+            .limit(pageSize);
+
+        res.send(likes);
+    }
+    catch (err) {
+        res.status(500).send(err.message);
+    }
 });
 
-likes.get('/:id', (req, res) => {
-    const like = findLikeById(req.params.id);
-    if (!like) return res.status(404).send(`Like with ID ${req.params.id} not found.`);
+likes.get('/:id', async (req, res) => {
+    try {
+        const like = await Like
+            .findById(req.params.id)
+            .populate('user', 'username  -_id')
+            .populate('post', 'title _id')
+            .select('user post createdAt -_id')
+        if (!like) return res.status(404).send(`Like with ID ${req.params.id} not found.`);
 
-    res.send(like);
+        res.send(like);
+    }
+    catch (err) {
+        res.status(500).send(err.message);
+    }
 });
 
 likes.post('/', (req, res) => {
