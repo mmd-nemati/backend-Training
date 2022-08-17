@@ -4,8 +4,11 @@ import { User } from '../../models/user/user.js';
 import { Post } from '../../models/post/post.js';
 import { Like } from '../../models/like/like.js';
 import { setSortOptins, paginate } from '../helper.js';
+import { authn } from '../../middlewares/authn.js'
+import { validateLike } from '../../models/like/validate.js';
 import express from 'express';
 import Joi from 'joi';
+import lodash from 'lodash';
 
 const likes = express();
 likes.use(express.json());
@@ -50,30 +53,39 @@ likes.get('/:id', async (req, res) => {
     }
 });
 
-likes.post('/', (req, res) => {
-    const { error } = validateLike(req.body, "post");
-    if (error) return res.status(400).send(error.message);
-    const user = findUserById(req.body.userId);
-    if (!user) return res.status(404).send(`User with ID ${req.body.userId} not found.`)
-    const post = findPostById(req.body.postId);
-    if (!post) return res.status(404).send(`Post with ID ${req.body.postId} not found.`);
+likes.post('/', authn, async (req, res) => {
+    try {
+        const { error } = validateLike(req.body);
+        if (error) return res.status(400).send(error.message);
 
-    let newLike = req.body;
-    // Check if same user has liked same post.
-    // If does, don't create new like. just return the old like.
-    let dupLike = findDuplicatedLike(newLike);
-    if (dupLike) return res.status(200).send(dupLike);
+        let like = new Like(lodash.pick(req.body, ['post']));
+        like.user = req.user._id;
+        like = await like.populate('user', 'username -_id')
+        like = await like.populate('post', 'title createdAt _id');
 
-    newLike.id = likesDBid++;
-    likesData.push(newLike);
+        if (!like.user) return res.status(401).send(`Invalid token.`);
+        if (!like.post) return res.status(404).send(`Post with ID ${req.body.post} not found.`);
 
-    res.status(201).send(newLike);
+        like = await like.save();
+        await Post.findByIdAndUpdate(like.post._id, {
+            $push: {
+                likes: like._id
+            }
+        });
+        res.status(201).send(lodash.pick(like, ['user.username', 'post', 'createdAt']));
+    }
+    catch (err) {
+        if (err.code === 11000)
+            return res.status(409).send(`Post already liked.`);
+        
+        res.status(500).send(err.message);
+    }
 });
 
 likes.put('/:id', (req, res) => {
     const like = findLikeById(req.params.id);
     if (!like) return res.status(404).send(`Like with ID ${req.params.id} not found.`);
-    const { error } = validateLike(req.body, "put");
+    const { error } = validateLikeDepricated(req.body, "put");
     if (error) return res.status(400).send(error.message);
 
     ({ userId: like.userId = like.userId, postId: like.postId = like.postId } = req.body);
@@ -90,7 +102,7 @@ likes.delete('/:id', (req, res) => {
     res.send(like);
 });
 
-function validateLike(like, reqType) {
+function validateLikeDepricated(like, reqType) {
     let schema;
     if (reqType === "post") {
         schema = Joi.object({
