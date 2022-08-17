@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
-import { UserSchema } from './schema.js';
+import { userSchema } from './schema.js';
 
-UserSchema.pre("save", function (next) {
+userSchema.pre("save", function (next) {
     const user = this
 
     if (this.isModified("password") || this.isNew) {
@@ -24,10 +24,10 @@ UserSchema.pre("save", function (next) {
     }
 });
 
-UserSchema.methods.comparePassword = async function(password) {
+userSchema.methods.comparePassword = async function(password) {
     bcrypt.compare(password, this.password, function(error, isMatch) {
         return (error ? error : isMatch);
     });
   }
 
-export { UserSchema };
+export { userSchema as UserSchema };

@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const PostSchema = mongoose.Schema({
+const postSchema = new mongoose.Schema({
     title: {
         type: String,
         required: true,
@@ -21,16 +21,10 @@ const PostSchema = mongoose.Schema({
     likes: {
         type: [mongoose.Schema.Types.ObjectId],
         ref: 'Like'
-    },
-    created_at: {
-        type: Date,
-        default: Date.now
-    },
-    updated_at: {
-        type: [Date],
-        default: []
     }
+}, { 
+    timestamps: true 
 });
 
-export { PostSchema };
+export { postSchema };
 

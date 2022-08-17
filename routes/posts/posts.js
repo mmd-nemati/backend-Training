@@ -91,12 +91,11 @@ posts.put('/:id', auth, async (req, res) => {
         if (req.user._id !== post.user.id) return res.status(403).send('Access denied.');
 
         post = await Post
-            .findOneAndUpdate({ _id: req.params.id }, {
-                ...lodash.pick(req.body, ['text', 'title']),
-                $push: {
-                    updated_at: Date.now()
-                }
-            }, { new: true, runValidators: true })
+            .findOneAndUpdate({ _id: req.params.id }, lodash.pick(req.body, ['text', 'title'])
+                , {
+                    new: true,
+                    runValidators: true
+                })
             .populate('user', 'name username -_id');
 
         res.send(lodash.pick(post, ['text', 'title', 'user', 'updated_at']));

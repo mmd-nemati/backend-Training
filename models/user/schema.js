@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import jwt from 'jsonwebtoken';
 import config from 'config';
 
-const UserSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
@@ -51,16 +51,14 @@ const UserSchema = new mongoose.Schema({
     posts: {
         type: [mongoose.Schema.Types.ObjectId],
         ref: 'Post'
-    },
-    created_at: {
-        type: Date,
-        default: Date.now
     }
+}, { 
+    timestamps: true 
 });
 
-UserSchema.methods.generateAuthToken = function () {
+userSchema.methods.generateAuthToken = function () {
     const token = jwt.sign({ _id: this._id, username: this.username }, config.get('jwtPrivateKey'));
     return token;
 }
 
-export { UserSchema };
+export { userSchema };
