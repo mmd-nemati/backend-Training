@@ -5,6 +5,7 @@ import { Post } from '../../models/post/post.js';
 import { Like } from '../../models/like/like.js';
 import { setSortOptins, paginate } from '../helper.js';
 import { authn } from '../../middlewares/authn.js'
+import { likeAuthz } from '../../middlewares/likeAuthz.js';
 import { validateLike } from '../../models/like/validate.js';
 import express from 'express';
 import Joi from 'joi';
@@ -97,14 +98,19 @@ likes.put('/:id', (req, res) => {
 });
 */
 
-likes.delete('/:id', (req, res) => {
-    const like = findLikeById(req.params.id);
-    if (!like) return res.status(404).send(`Like with id ${req.params.id} not found`);
-
-    let index = likesData.indexOf(like);
-    likesData.splice(index, 1);
-
-    res.send(like);
+likes.delete('/:id', [authn, likeAuthz], async (req, res) => {
+    try {
+        await Like.findByIdAndRemove(req.params.id);
+        await Post.findByIdAndUpdate(req.like.post.id, {
+            $pull: {
+                likes: req.params.id
+            }
+        });
+        res.status(200).send(`Post unliked successfully.`);
+    }
+    catch (err) {
+        res.status(500).send(err.message);
+    }
 });
 
 function validateLikeDepricated(like, reqType) {
