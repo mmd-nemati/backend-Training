@@ -84,7 +84,7 @@ posts.put('/:id', [authn, postAuthz], async (req, res) => {
     try {
         const { error } = validatePutPost(req.body);
         if (error) return res.status(400).send(error.message);
-        
+
         let post = req.post;
         post = await Post
             .findOneAndUpdate({ _id: req.params.id }, lodash.pick(req.body, ['text', 'title'])
@@ -107,7 +107,11 @@ posts.put('/:id', [authn, postAuthz], async (req, res) => {
 posts.delete('/:id', [authn, postAuthz], async (req, res) => {
     try {
         await Post.findByIdAndRemove(req.params.id);
-
+        await User.findByIdAndUpdate(req.user._id, {
+            $pull: {
+                posts: req.params.id
+            }
+        });
         res.status(200).send(`Post deleted successfully.`);
     }
     catch (err) {
