@@ -1,5 +1,8 @@
 import { findUserById } from '../users/users.js';
 import { findPostById } from '../posts/posts.js';
+import { User } from '../../models/user/user.js';
+import { Post } from '../../models/post/post.js';
+import { Like } from '../../models/like/like.js';
 import express from 'express';
 import Joi from 'joi';
 
