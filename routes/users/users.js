@@ -6,6 +6,7 @@ import lodash from 'lodash';
 import { User, validatePostUser, validatePutUser } from '../../models/user/user.js';
 import { setSortOptins } from '../helper.js';
 import { authn } from '../../middlewares/authn.js';
+import { userAutzh } from '../../middlewares/userAuthz.js';
 
 const users = express();
 users.use(express.json());
@@ -71,16 +72,12 @@ users.post('/', async (req, res) => {
     }
 });
 
-users.put('/:id', authn, async (req, res) => {
+users.put('/:id', [authn, userAutzh], async (req, res) => {
     try {
         const { error } = validatePutUser(req.body, "put");
         if (error) return res.status(400).send(error.message);
-        let user = await User.findById(req.params.id)
-            .select('-password -created_at');
-        if (!user) return res.status(404).send(`User with ID ${req.params.id} Not Found.`);
-        if (req.user._id !== user.id) return res.status(403).send(`Access denied.`);
 
-        user = await User.findOneAndUpdate({ _id: req.params.id }, lodash.pick(req.body, ['name', 'username', 'age', '_id']),
+        const user = await User.findOneAndUpdate({ _id: req.params.id }, lodash.pick(req.body, ['name', 'username', 'age', '_id']),
             { new: true, runValidators: true });
 
         res.status(200).send(lodash.pick(user, ['name', 'username', 'age']));
@@ -95,14 +92,9 @@ users.put('/:id', authn, async (req, res) => {
     }
 });
 
-users.delete('/:id', authn, async (req, res) => {
+users.delete('/:id', [authn, userAutzh], async (req, res) => {
     try {
-        let user = await User.findById(req.params.id)
-            .select('-password -created_at');
-        if (!user) return res.status(404).send(`User with ID ${req.params.id} Not Found.`);
-        if (req.user._id !== user.id) return res.status(403).send(`Access denied.`);
-        
-        user = await User.findByIdAndRemove(req.params.id, { new: true });
+        const user = await User.findByIdAndRemove(req.params.id, { new: true });
         if (!user) return res.status(404).send(`User with ID ${req.params.id} Not Found.`);
 
         res.status(200).send(`${user.username} was deleted successfully.`);
