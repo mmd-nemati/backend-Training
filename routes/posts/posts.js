@@ -5,7 +5,8 @@ import lodash from 'lodash';
 import { Post } from '../../models/post/post.js';
 import { findUserById } from '../users/users.js';
 import { setSortOptins } from '../helper.js';
-import { auth } from '../../middlewares/auth.js';
+import { authn } from '../../middlewares/authn.js';
+import { postAuthz } from '../../middlewares/postAuthz.js';
 import { validatePostPost, validatePutPost } from '../../models/post/validate.js'
 import { User } from '../../models/user/user.js';
 
@@ -53,7 +54,7 @@ posts.get('/:id', async (req, res) => {
     }
 });
 
-posts.post('/', auth, async (req, res) => {
+posts.post('/', authn, async (req, res) => {
     try {
         const { error } = validatePostPost(req.body);
         if (error) return res.status(400).send(error.message);
@@ -79,17 +80,12 @@ posts.post('/', auth, async (req, res) => {
     }
 });
 
-posts.put('/:id', auth, async (req, res) => {
+posts.put('/:id', [authn, postAuthz], async (req, res) => {
     try {
-        let post = await Post
-            .findById(req.params.id)
-            .select('title text user')
-            .populate('user', 'id');
-        if (!post) return res.status(404).send(`Post with ID ${req.params.id} not found.`);
         const { error } = validatePutPost(req.body);
         if (error) return res.status(400).send(error.message);
-        if (req.user._id !== post.user.id) return res.status(403).send('Access denied.');
-
+        
+        let post = req.post;
         post = await Post
             .findOneAndUpdate({ _id: req.params.id }, lodash.pick(req.body, ['text', 'title'])
                 , {
@@ -108,15 +104,9 @@ posts.put('/:id', auth, async (req, res) => {
     }
 });
 
-posts.delete('/:id', auth, async (req, res) => {
+posts.delete('/:id', [authn, postAuthz], async (req, res) => {
     try {
-        let post = await Post.findById(req.params.id)
-            .select('user')
-            .populate('user', 'id');
-        if (!post) return res.status(404).send(`Post with ID ${req.params.id} not found.`);
-        if (req.user._id !== post.user.id) return res.status(403).send('Access denied.');
-
-        post = await Post.findByIdAndRemove(req.params.id, { new: true });
+        await Post.findByIdAndRemove(req.params.id);
 
         res.status(200).send(`Post deleted successfully.`);
     }

@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import config from 'config';
 
-function auth(req, res, next) {
+function authn(req, res, next) {
     try {
         const token = req.header(config.get('authTokenName'));
         if (!token) return res.status(401).send('Access denied. No token provided.');
@@ -15,4 +15,4 @@ function auth(req, res, next) {
     }
 }
 
-export { auth };
+export { authn };

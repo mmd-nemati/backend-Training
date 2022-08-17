@@ -5,7 +5,7 @@ import config from 'config';
 import lodash from 'lodash';
 import { User, validatePostUser, validatePutUser } from '../../models/user/user.js';
 import { setSortOptins } from '../helper.js';
-import { auth } from '../../middlewares/auth.js';
+import { authn } from '../../middlewares/authn.js';
 
 const users = express();
 users.use(express.json());
@@ -71,7 +71,7 @@ users.post('/', async (req, res) => {
     }
 });
 
-users.put('/:id', auth, async (req, res) => {
+users.put('/:id', authn, async (req, res) => {
     try {
         const { error } = validatePutUser(req.body, "put");
         if (error) return res.status(400).send(error.message);
@@ -95,7 +95,7 @@ users.put('/:id', auth, async (req, res) => {
     }
 });
 
-users.delete('/:id', auth, async (req, res) => {
+users.delete('/:id', authn, async (req, res) => {
     try {
         let user = await User.findById(req.params.id)
             .select('-password -created_at');
