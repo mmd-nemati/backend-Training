@@ -3,6 +3,7 @@ import { findPostById } from '../posts/posts.js';
 import { User } from '../../models/user/user.js';
 import { Post } from '../../models/post/post.js';
 import { Like } from '../../models/like/like.js';
+import { setSortOptins, paginate } from '../helper.js';
 import express from 'express';
 import Joi from 'joi';
 
@@ -15,8 +16,7 @@ let likesDBid = 1;
 likes.get('/', async (req, res) => {
     try {
         let sortParam = setSortOptins(req.query);
-        let pageNumber = req.query.pageNumber ? parseInt(req.query.pageNumber) : 1;
-        let pageSize = req.query.pageSize ? parseInt(req.query.pageSize) : 10;
+        const pageOptions = paginate(req.query);
 
         const likes = await Like
             .find()
@@ -24,8 +24,8 @@ likes.get('/', async (req, res) => {
             .populate('post', 'title _id')
             .select('user post createdAt -_id')
             .sort(sortParam)
-            .skip((pageNumber - 1) * pageSize)
-            .limit(pageSize);
+            .skip((pageOptions.page - 1) * pageOptions.limit)
+            .limit(pageOptions.limit);
 
         res.send(likes);
     }

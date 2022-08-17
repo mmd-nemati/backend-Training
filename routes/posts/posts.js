@@ -4,7 +4,7 @@ import config from 'config';
 import lodash from 'lodash';
 import { Post } from '../../models/post/post.js';
 import { findUserById } from '../users/users.js';
-import { setSortOptins } from '../helper.js';
+import { setSortOptins, paginate } from '../helper.js';
 import { authn } from '../../middlewares/authn.js';
 import { postAuthz } from '../../middlewares/postAuthz.js';
 import { validatePostPost, validatePutPost } from '../../models/post/validate.js'
@@ -19,17 +19,16 @@ let postsDBid = 1;
 posts.get('/', async (req, res) => {
     try {
         let sortParam = setSortOptins(req.query);
-        let pageNumber = req.params.pageNumber ? parseInt(req.params.pageNumber) : 1;
-        let pageSize = req.params.pageSize ? parseInt(req.params.pageSize) : 10;
-
+        const pageOptions = paginate(req.query);
+        
         const posts = await Post
             .find()
             .populate('user', 'name username  -_id')
             // .populate('likes', '')
             .select('title text user likes created_at -_id')
             .sort(sortParam)
-            .skip((pageNumber - 1) * pageSize)
-            .limit(pageSize);
+            .skip((pageOptions.page - 1) * pageOptions.limit)
+            .limit(pageOptions.limit);
 
         res.send(posts);
     }

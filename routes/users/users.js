@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import config from 'config';
 import lodash from 'lodash';
 import { User, validatePostUser, validatePutUser } from '../../models/user/user.js';
-import { setSortOptins } from '../helper.js';
+import { setSortOptins, paginate } from '../helper.js';
 import { authn } from '../../middlewares/authn.js';
 import { userAutzh } from '../../middlewares/userAuthz.js';
 
@@ -17,15 +17,14 @@ let usersDBid = 1;
 users.get('/', async (req, res) => {
     try {
         let sortParam = setSortOptins(req.query);
-        let pageNumber = req.params.pageNumber ? parseInt(req.params.pageNumber) : 1;
-        let pageSize = req.params.pageSize ? parseInt(req.params.pageSize) : 10;
-
+        const pageOptions = paginate(req.query);
+        
         const users = await User
             .find()
             .select('name username age created_at -_id')
             .sort(sortParam)
-            .skip((pageNumber - 1) * pageSize)
-            .limit(pageSize);
+            .skip((pageOptions.page - 1) * pageOptions.limit)
+            .limit(pageOptions.limit);
 
         res.send(users);
     }
