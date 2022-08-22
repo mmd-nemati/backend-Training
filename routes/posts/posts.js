@@ -1,20 +1,14 @@
 import express from 'express';
-import Joi from 'joi';
-import config from 'config';
 import lodash from 'lodash';
+import { User } from '../../models/user/user.js';
 import { Post } from '../../models/post/post.js';
-import { findUserById } from '../users/users.js';
 import { setSortOptins, paginate } from '../helper.js';
 import { authn } from '../../middlewares/authn.js';
 import { postAuthz } from '../../middlewares/postAuthz.js';
 import { validatePostPost, validatePutPost } from '../../models/post/validate.js'
-import { User } from '../../models/user/user.js';
 
 const posts = express();
 posts.use(express.json());
-
-let postsData = [];
-let postsDBid = 1;
 
 posts.get('/', async (req, res) => {
     try {
@@ -118,8 +112,4 @@ posts.delete('/:id', [authn, postAuthz], async (req, res) => {
     }
 });
 
-function findPostById(id) {
-    return postsData.find(p => p.id === parseInt(id));
-}
-
-export { posts, postsData, findPostById };
+export { posts };

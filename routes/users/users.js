@@ -1,6 +1,4 @@
 import express from 'express';
-import Joi from 'joi';
-import jwt from 'jsonwebtoken';
 import config from 'config';
 import lodash from 'lodash';
 import { User, validatePostUser, validatePutUser } from '../../models/user/user.js';
@@ -10,9 +8,6 @@ import { userAutzh } from '../../middlewares/userAuthz.js';
 
 const users = express();
 users.use(express.json());
-
-let usersData = [];
-let usersDBid = 1;
 
 users.get('/', async (req, res) => {
     try {
@@ -103,8 +98,4 @@ users.delete('/:id', [authn, userAutzh], async (req, res) => {
     }
 });
 
-function findUserById(id) {
-    return usersData.find(u => u.id === parseInt(id));
-}
-
-export { users, usersData, findUserById };
+export { users };

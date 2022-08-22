@@ -1,6 +1,3 @@
-import { findUserById } from '../users/users.js';
-import { findPostById } from '../posts/posts.js';
-import { User } from '../../models/user/user.js';
 import { Post } from '../../models/post/post.js';
 import { Like } from '../../models/like/like.js';
 import { setSortOptins, paginate } from '../helper.js';
@@ -8,14 +5,10 @@ import { authn } from '../../middlewares/authn.js'
 import { likeAuthz } from '../../middlewares/likeAuthz.js';
 import { validateLike } from '../../models/like/validate.js';
 import express from 'express';
-import Joi from 'joi';
 import lodash from 'lodash';
 
 const likes = express();
 likes.use(express.json());
-
-let likesData = [];
-let likesDBid = 1;
 
 likes.get('/', async (req, res) => {
     try {
@@ -112,30 +105,5 @@ likes.delete('/:id', [authn, likeAuthz], async (req, res) => {
         res.status(500).send(err.message);
     }
 });
-
-function validateLikeDepricated(like, reqType) {
-    let schema;
-    if (reqType === "post") {
-        schema = Joi.object({
-            userId: Joi.number().integer().required(),
-            postId: Joi.number().integer().required()
-        });
-    } else if (reqType === "put") {
-        schema = Joi.object({
-            userId: Joi.number().integer(),
-            postId: Joi.number().integer()
-        });
-    } else return true;
-
-    return schema.validate(like);
-}
-
-function findLikeById(id) {
-    return likesData.find(l => l.id === parseInt(id));
-}
-
-function findDuplicatedLike(like) {
-    return likesData.find(l => l.postId === like.postId && l.userId === like.userId);
-}
 
 export { likes };
