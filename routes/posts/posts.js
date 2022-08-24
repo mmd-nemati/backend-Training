@@ -5,7 +5,6 @@ import { Post } from '../../models/post/post.js';
 import { setSortOptins, paginate } from '../helper.js';
 import { authn } from '../../middlewares/authn.js';
 import { postAuthz } from '../../middlewares/postAuthz.js';
-import { validatePostPost, validatePutPost } from '../../models/post/validate.js'
 
 const posts = express();
 posts.use(express.json());
@@ -49,9 +48,6 @@ posts.get('/:id', async (req, res) => {
 
 posts.post('/', authn, async (req, res) => {
     try {
-        const { error } = validatePostPost(req.body);
-        if (error) return res.status(400).send(error.message);
-
         let post = new Post(lodash.pick(req.body, ['title', 'text']));
         post.user = req.user._id;
         post = await post.populate('user', 'name username -_id');
@@ -75,9 +71,6 @@ posts.post('/', authn, async (req, res) => {
 
 posts.put('/:id', [authn, postAuthz], async (req, res) => {
     try {
-        const { error } = validatePutPost(req.body);
-        if (error) return res.status(400).send(error.message);
-
         let post = req.post;
         post = await Post
             .findOneAndUpdate({ _id: req.params.id }, lodash.pick(req.body, ['text', 'title'])

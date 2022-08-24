@@ -1,11 +1,10 @@
+import express from 'express';
+import lodash from 'lodash';
 import { Post } from '../../models/post/post.js';
 import { Like } from '../../models/like/like.js';
 import { setSortOptins, paginate } from '../helper.js';
 import { authn } from '../../middlewares/authn.js'
 import { likeAuthz } from '../../middlewares/likeAuthz.js';
-import { validateLike } from '../../models/like/validate.js';
-import express from 'express';
-import lodash from 'lodash';
 
 const likes = express();
 likes.use(express.json());
@@ -49,9 +48,6 @@ likes.get('/:id', async (req, res) => {
 
 likes.post('/', authn, async (req, res) => {
     try {
-        const { error } = validateLike(req.body);
-        if (error) return res.status(400).send(error.message);
-
         let like = new Like(lodash.pick(req.body, ['post']));
         like.user = req.user._id;
         like = await like.populate('user', 'username -_id')

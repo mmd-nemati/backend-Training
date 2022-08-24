@@ -1,7 +1,7 @@
 import express from 'express';
 import config from 'config';
 import lodash from 'lodash';
-import { User, validatePostUser, validatePutUser } from '../../models/user/user.js';
+import { User } from '../../models/user/user.js';
 import { setSortOptins, paginate } from '../helper.js';
 import { authn } from '../../middlewares/authn.js';
 import { userAutzh } from '../../middlewares/userAuthz.js';
@@ -44,9 +44,6 @@ users.get('/:id', async (req, res) => {
 
 users.post('/', async (req, res) => {
     try {
-        const { error } = validatePostUser(req.body);
-        if (error) return res.status(400).send(error.message);
-
         let user = new User(lodash.pick(req.body, ['name', 'username', 'email', 'password', 'age', 'phoneNumber']));
         user = await user.save();
 
@@ -68,9 +65,6 @@ users.post('/', async (req, res) => {
 
 users.put('/:id', [authn, userAutzh], async (req, res) => {
     try {
-        const { error } = validatePutUser(req.body, "put");
-        if (error) return res.status(400).send(error.message);
-
         const user = await User.findOneAndUpdate({ _id: req.params.id }, lodash.pick(req.body, ['name', 'username', 'age', '_id']),
             { new: true, runValidators: true });
 
