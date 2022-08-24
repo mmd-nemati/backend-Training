@@ -1,6 +1,7 @@
 import express from 'express';
 import config from 'config';
 import lodash from 'lodash';
+import bcrypt from 'bcryptjs';
 import { User } from '../../models/user/user.js';
 import { setSortOptins, paginate } from '../helper.js';
 import { authn } from '../../middlewares/authn.js';
@@ -59,6 +60,22 @@ users.post('/', async (req, res) => {
         if (err.code === 11000 && err.keyPattern.email === 1)
             return res.status(400).send(`Email '${err.keyValue.email}' already signed up.`);
 
+        res.status(500).send(err.message);
+    }
+});
+
+users.post('/login', async (req, res) => {
+    try {
+        const user = await User.findOne({ $or: [{ email: req.body.email }, { username: req.body.username }] })
+        if (!user) return res.status(400).send(`Invalid credentials.`);
+        
+        const valid = await bcrypt.compare(req.body.password, user.password);
+        if (!valid) return res.status(400).send(`Invalid credentials.`);
+
+        let token = user.generateAuthToken();
+        res.header(config.get('authTokenName'), token).status(200).send(`Logged in successfully.`);
+    }
+    catch (err) {
         res.status(500).send(err.message);
     }
 });
