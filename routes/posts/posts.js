@@ -6,7 +6,7 @@ import { setSortOptins, paginate } from '../helper.js';
 import { authn } from '../../middlewares/authn.js';
 import { postAuthz } from '../../middlewares/postAuthz.js';
 
-import { getAllPosts, getOnePost } from '../../services/posts/posts.js';
+import { getAllPosts, getOnePost, createPost } from '../../services/posts/posts.js';
 
 const posts = express();
 posts.use(express.json());
@@ -30,31 +30,24 @@ posts.get('/:id', async (req, res) => {
     }
     catch (err) {
         if (err.message === 'Post not found') return res.status(404).send(`Post with ID ${req.params.id} not found.`);
-        
+
         res.status(500).send(err.message);
     }
 });
 
 posts.post('/', authn, async (req, res) => {
     try {
-        let post = new Post(lodash.pick(req.body, ['title', 'text']));
-        post.user = req.user._id;
-        post = await post.populate('user', 'name username -_id');
-        if (!post.user) return res.status(401).send(`Invalid token.`);
-        post = await post.save();
+        const result = await createPost(req);
 
-        await User.findByIdAndUpdate(req.user._id, {
-            $push: {
-                posts: post._id
-            }
-        });
-
-        res.status(201).send(lodash.pick(post, ['text', 'title', 'user', 'created_at']));
+        res.status(201).send(lodash.pick(result.post, ['text', 'title', 'user', 'created_at']));
     }
     catch (err) {
+        if (err.message === 'Invalid token')
+            return res.status(401).send(`Invalid token.`);
         if (err.name === "ValidationError")
-            return res.status(400).send(err);
-        res.status(500).send(err);
+            return res.status(400).send(err.message);
+
+        res.status(500).send(err.message);
     }
 });
 
