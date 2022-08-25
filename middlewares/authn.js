@@ -7,6 +7,10 @@ async function authn(req, res, next) {
         if (!token) return res.status(401).send('Access denied. No token provided.');
 
         const payload = jwt.decode(token, config.get('jwtPrivateKey'), { complete: true });
+       
+        let dateNow = new Date();
+        if (!payload.exp) throw new Error();
+        if (payload.exp < dateNow.getTime()/1000) throw new Error('TokenExpiredError');
         await jwt.verify(token, config.get('jwtPrivateKey'));
         
         req.user = payload;
