@@ -1,5 +1,6 @@
 import express from 'express';
 import lodash from 'lodash';
+import { User } from '../../models/user/user.js';
 import { Post } from '../../models/post/post.js';
 import { Like } from '../../models/like/like.js';
 import { setSortOptins, paginate } from '../helper.js';
@@ -62,6 +63,11 @@ likes.post('/', authn, async (req, res) => {
                 likes: like._id
             }
         });
+        await User.findByIdAndUpdate(req.user._id, {
+            $push: {
+                likes: like._id
+            }
+        });
         res.status(201).send(lodash.pick(like, ['user.username', 'post', 'createdAt']));
     }
     catch (err) {
@@ -91,6 +97,11 @@ likes.delete('/:id', [authn, likeAuthz], async (req, res) => {
     try {
         await Like.findByIdAndRemove(req.params.id);
         await Post.findByIdAndUpdate(req.like.post.id, {
+            $pull: {
+                likes: req.params.id
+            }
+        });
+        await User.findByIdAndUpdate(req.user._id, {
             $pull: {
                 likes: req.params.id
             }

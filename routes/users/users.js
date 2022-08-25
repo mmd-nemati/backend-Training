@@ -61,6 +61,8 @@ users.post('/login', async (req, res) => {
         res.header(config.get('authTokenName'), result.token).status(200).send(`Logged in successfully.`);
     }
     catch (err) {
+        if (err.message === 'Invalid credentials.') return res.status(400).send(err.message);
+        
         res.status(500).send(err.message);
     }
 });

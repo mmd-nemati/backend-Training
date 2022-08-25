@@ -58,7 +58,7 @@ posts.post('/', authn, async (req, res) => {
             $push: {
                 posts: post._id
             }
-        })
+        });
 
         res.status(201).send(lodash.pick(post, ['text', 'title', 'user', 'created_at']));
     }
