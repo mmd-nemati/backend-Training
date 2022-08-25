@@ -6,43 +6,32 @@ import { setSortOptins, paginate } from '../helper.js';
 import { authn } from '../../middlewares/authn.js';
 import { postAuthz } from '../../middlewares/postAuthz.js';
 
+import { getAllPosts, getOnePost } from '../../services/posts/posts.js';
+
 const posts = express();
 posts.use(express.json());
 
 posts.get('/', async (req, res) => {
     try {
-        let sortParam = setSortOptins(req.query);
-        const pageOptions = paginate(req.query);
-        
-        const posts = await Post
-            .find()
-            .populate('user', 'name username  -_id')
-            // .populate('likes', '')
-            .select('title text user likes created_at -_id')
-            .sort(sortParam)
-            .skip((pageOptions.page - 1) * pageOptions.limit)
-            .limit(pageOptions.limit);
+        const result = await getAllPosts(req);
 
-        res.send(posts);
+        res.send(result.posts);
     }
     catch (err) {
-        res.status(500).send(err);
+        res.status(500).send(err.message);
     }
 });
 
 posts.get('/:id', async (req, res) => {
     try {
-        const post = await Post
-            .findById(req.params.id)
-            .populate('user', 'name username  -_id')
-            // .populate('likes', '')
-            .select('title text user likes created_at -_id')
-        if (!post) return res.status(404).send(`Post with ID ${req.params.id} not found.`);
+        const result = await getOnePost(req.params.id);
 
-        res.send(post);
+        res.send(result.post);
     }
     catch (err) {
-        res.status(500).send(err);
+        if (err.message === 'Post not found') return res.status(404).send(`Post with ID ${req.params.id} not found.`);
+        
+        res.status(500).send(err.message);
     }
 });
 
