@@ -59,4 +59,36 @@ async function createPost(req) {
     }
 }
 
-export { getAllPosts, getOnePost, createPost };
+async function editPost(req) {
+    try {
+        let post = req.post;
+        post = await Post
+            .findOneAndUpdate({ _id: req.params.id }, lodash.pick(req.body, ['text', 'title'])
+                , {
+                    new: true,
+                    runValidators: true
+                })
+            .populate('user', 'name username -_id');
+
+        return { 'post': post };
+    }
+    catch (err) {
+        throw err;
+    }
+}
+
+async function deletePost(req) {
+    try {
+        await Post.findByIdAndRemove(req.params.id);
+        await User.findByIdAndUpdate(req.user._id, {
+            $pull: {
+                posts: req.params.id
+            }
+        });
+    }
+    catch (err) {
+        throw err;
+    }
+}
+
+export { getAllPosts, getOnePost, createPost, editPost, deletePost };

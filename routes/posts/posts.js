@@ -1,12 +1,12 @@
 import express from 'express';
 import lodash from 'lodash';
-import { User } from '../../models/user/user.js';
-import { Post } from '../../models/post/post.js';
-import { setSortOptins, paginate } from '../helper.js';
 import { authn } from '../../middlewares/authn.js';
 import { postAuthz } from '../../middlewares/postAuthz.js';
 
-import { getAllPosts, getOnePost, createPost } from '../../services/posts/posts.js';
+import {
+    getAllPosts, getOnePost, createPost,
+    editPost, deletePost
+} from '../../services/posts/posts.js';
 
 const posts = express();
 posts.use(express.json());
@@ -53,16 +53,9 @@ posts.post('/', authn, async (req, res) => {
 
 posts.put('/:id', [authn, postAuthz], async (req, res) => {
     try {
-        let post = req.post;
-        post = await Post
-            .findOneAndUpdate({ _id: req.params.id }, lodash.pick(req.body, ['text', 'title'])
-                , {
-                    new: true,
-                    runValidators: true
-                })
-            .populate('user', 'name username -_id');
+        const result = await editPost(req);
 
-        res.send(lodash.pick(post, ['text', 'title', 'user', 'updated_at']));
+        res.send(lodash.pick(result.post, ['text', 'title', 'user', 'updated_at']));
     }
     catch (err) {
         if (err.name === "ValidationError")
@@ -74,12 +67,8 @@ posts.put('/:id', [authn, postAuthz], async (req, res) => {
 
 posts.delete('/:id', [authn, postAuthz], async (req, res) => {
     try {
-        await Post.findByIdAndRemove(req.params.id);
-        await User.findByIdAndUpdate(req.user._id, {
-            $pull: {
-                posts: req.params.id
-            }
-        });
+        await deletePost(req);
+
         res.status(200).send(`Post deleted successfully.`);
     }
     catch (err) {
