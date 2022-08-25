@@ -108,3 +108,6 @@ run.sh
 
 # TODO file
 *.todo
+
+# vscode files
+.vscode

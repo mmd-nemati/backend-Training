@@ -7,24 +7,16 @@ import { setSortOptins, paginate } from '../helper.js';
 import { authn } from '../../middlewares/authn.js'
 import { likeAuthz } from '../../middlewares/likeAuthz.js';
 
+import { getAllLikes, getOneLike } from '../../services/likes/likes.js'
+
 const likes = express();
 likes.use(express.json());
 
 likes.get('/', async (req, res) => {
     try {
-        let sortParam = setSortOptins(req.query);
-        const pageOptions = paginate(req.query);
+        const result = await getAllLikes(req);
 
-        const likes = await Like
-            .find()
-            .populate('user', 'username  -_id')
-            .populate('post', 'title _id')
-            .select('user post createdAt -_id')
-            .sort(sortParam)
-            .skip((pageOptions.page - 1) * pageOptions.limit)
-            .limit(pageOptions.limit);
-
-        res.send(likes);
+        res.send(result.likes);
     }
     catch (err) {
         res.status(500).send(err.message);
@@ -33,14 +25,9 @@ likes.get('/', async (req, res) => {
 
 likes.get('/:id', async (req, res) => {
     try {
-        const like = await Like
-            .findById(req.params.id)
-            .populate('user', 'username  -_id')
-            .populate('post', 'title _id')
-            .select('user post createdAt -_id')
-        if (!like) return res.status(404).send(`Like with ID ${req.params.id} not found.`);
+        const result = await getOneLike(req.params.id);
 
-        res.send(like);
+        res.send(result.like);
     }
     catch (err) {
         res.status(500).send(err.message);
