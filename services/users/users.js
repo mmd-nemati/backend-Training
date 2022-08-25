@@ -26,7 +26,7 @@ async function getOneUser(id) {
         const user = await User
             .findById(id)
             .select('name username age created_at -_id');
-        if (!user) throw { 'message': 'User not found' };
+        if (!user) throw new Error('User not found');
 
         return { 'user': user };
     }
@@ -52,10 +52,10 @@ async function signUp(req) {
 async function login(req) {
     try {
         const user = await User.findOne({ $or: [{ email: req.body.email }, { username: req.body.username }] });
-        if (!user) throw { 'message': 'Invalid credentials.' };
+        if (!user) throw new Error('Invalid credentials');
 
         const valid = await bcrypt.compare(req.body.password, user.password);
-        if (!valid) throw { 'message': 'Invalid credentials.' };
+        if (!valid) throw new Error('Invalid credentials');
 
         const token = user.generateAuthToken();
 
