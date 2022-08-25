@@ -70,4 +70,23 @@ async function likePost(req) {
     }
 }
 
-export { getAllLikes, getOneLike, likePost }
+async function unlikePost(req) {
+    try {
+        await Like.findByIdAndRemove(req.params.id);
+        await Post.findByIdAndUpdate(req.like.post.id, {
+            $pull: {
+                likes: req.params.id
+            }
+        });
+        await User.findByIdAndUpdate(req.user._id, {
+            $pull: {
+                likes: req.params.id
+            }
+        });
+    }
+    catch (err) {
+        throw err;
+    }
+}
+
+export { getAllLikes, getOneLike, likePost, unlikePost }

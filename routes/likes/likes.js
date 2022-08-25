@@ -7,7 +7,10 @@ import { setSortOptins, paginate } from '../helper.js';
 import { authn } from '../../middlewares/authn.js'
 import { likeAuthz } from '../../middlewares/likeAuthz.js';
 
-import { getAllLikes, getOneLike, likePost } from '../../services/likes/likes.js'
+import {
+    getAllLikes, getOneLike, likePost,
+    unlikePost
+} from '../../services/likes/likes.js'
 
 const likes = express();
 likes.use(express.json());
@@ -37,7 +40,7 @@ likes.get('/:id', async (req, res) => {
 likes.post('/', authn, async (req, res) => {
     try {
         const result = await likePost(req);
-        
+
         res.status(201).send(lodash.pick(result.like, ['user.username', 'post', 'createdAt']));
     }
     catch (err) {
@@ -69,17 +72,8 @@ likes.put('/:id', (req, res) => {
 
 likes.delete('/:id', [authn, likeAuthz], async (req, res) => {
     try {
-        await Like.findByIdAndRemove(req.params.id);
-        await Post.findByIdAndUpdate(req.like.post.id, {
-            $pull: {
-                likes: req.params.id
-            }
-        });
-        await User.findByIdAndUpdate(req.user._id, {
-            $pull: {
-                likes: req.params.id
-            }
-        });
+        await unlikePost(req);
+        
         res.status(200).send(`Post unliked successfully.`);
     }
     catch (err) {
