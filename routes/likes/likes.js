@@ -7,7 +7,7 @@ import { setSortOptins, paginate } from '../helper.js';
 import { authn } from '../../middlewares/authn.js'
 import { likeAuthz } from '../../middlewares/likeAuthz.js';
 
-import { getAllLikes, getOneLike } from '../../services/likes/likes.js'
+import { getAllLikes, getOneLike, likePost } from '../../services/likes/likes.js'
 
 const likes = express();
 likes.use(express.json());
@@ -36,31 +36,18 @@ likes.get('/:id', async (req, res) => {
 
 likes.post('/', authn, async (req, res) => {
     try {
-        let like = new Like(lodash.pick(req.body, ['post']));
-        like.user = req.user._id;
-        like = await like.populate('user', 'username -_id')
-        like = await like.populate('post', 'title createdAt _id');
-
-        if (!like.user) return res.status(401).send(`Invalid token.`);
-        if (!like.post) return res.status(404).send(`Post with ID ${req.body.post} not found.`);
-
-        like = await like.save();
-        await Post.findByIdAndUpdate(like.post._id, {
-            $push: {
-                likes: like._id
-            }
-        });
-        await User.findByIdAndUpdate(req.user._id, {
-            $push: {
-                likes: like._id
-            }
-        });
-        res.status(201).send(lodash.pick(like, ['user.username', 'post', 'createdAt']));
+        const result = await likePost(req);
+        
+        res.status(201).send(lodash.pick(result.like, ['user.username', 'post', 'createdAt']));
     }
     catch (err) {
+        if (err.message === 'Invalid token')
+            return res.status(401).send(`Invalid token`);
+        if (err.message === 'Post not found')
+            return res.status(404).send('Post not found');
         if (err.code === 11000)
             return res.status(409).send(`Post already liked.`);
-        
+
         res.status(500).send(err.message);
     }
 });

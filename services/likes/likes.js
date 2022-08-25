@@ -41,4 +41,33 @@ async function getOneLike(id) {
     }
 }
 
-export { getAllLikes, getOneLike }
+async function likePost(req) {
+    try {
+        let like = new Like(lodash.pick(req.body, ['post']));
+        like.user = req.user._id;
+        like = await like.populate('user', 'username -_id')
+        like = await like.populate('post', 'title createdAt _id');
+
+        if (!like.user) throw new Error('Invalid token');
+        if (!like.post) throw new Error('Post not found');
+
+        like = await like.save();
+        await Post.findByIdAndUpdate(like.post._id, {
+            $push: {
+                likes: like._id
+            }
+        });
+        await User.findByIdAndUpdate(req.user._id, {
+            $push: {
+                likes: like._id
+            }
+        });
+
+        return { 'like': like };
+    }
+    catch (err) {
+        throw err;
+    }
+}
+
+export { getAllLikes, getOneLike, likePost }
