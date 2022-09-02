@@ -144,6 +144,9 @@ const doc = {
                 "username": "Frodo Baggins"
             },
             createdAt: "2022-08-17T20:15:39.919Z"
+        },
+        NewLike: {
+            post: "62fc1563f537fd538eceb2dc"
         }
     }
 }

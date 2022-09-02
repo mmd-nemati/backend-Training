@@ -56,6 +56,22 @@ likes.get('/:id', async (req, res) => {
 });
 
 likes.post('/', authn, async (req, res) => {
+    /*  
+        #swagger.tags = ['Like']
+        #swagger.description = 'Endpoint to create a new like. The account with given jwt token is the liker.' 
+        #swagger.responses[201] = { 
+            description: "Returns the created like.",
+            schema: { $ref: '#/definitions/Like' },
+        }
+        #swagger.parameters[jwtToken] = {
+            $ref: "#myParameters/jwtToken"
+        }
+        #swagger.requestBody[newLike] = {
+            description: 'The post parameter should be ID of the post.',
+            required: true,
+            schema: { $ref: '#/definitions/NewLike' }
+        }
+    */
     try {
         const result = await likePost(req);
 
@@ -74,6 +90,16 @@ likes.post('/', authn, async (req, res) => {
 });
 
 likes.delete('/:id', [authn, likeAuthz], async (req, res) => {
+    /*  
+        #swagger.tags = ['Like']
+        #swagger.description = 'Endpoint to delete a like. The account with given jwt token is the unliker.' 
+        #swagger.responses[200] = { 
+            description: "Returns some message."
+        }
+        #swagger.parameters[jwtToken] = {
+            $ref: "#myParameters/jwtToken"
+        }
+    */
     try {
         await unlikePost(req);
 

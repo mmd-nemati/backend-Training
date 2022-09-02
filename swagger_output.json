@@ -578,11 +578,30 @@
         }
       },
       "post": {
-        "description": "",
-        "parameters": [],
+        "tags": [
+          "Like"
+        ],
+        "description": "Endpoint to create a new like. The account with given jwt token is the liker.",
+        "parameters": [
+          {
+            "$ref": "#myParameters/jwtToken"
+          }
+        ],
         "responses": {
           "201": {
-            "description": "Created"
+            "description": "Returns the created like.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Like"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Like"
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad Request"
@@ -598,6 +617,22 @@
           },
           "500": {
             "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "description": "The post parameter should be ID of the post.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewLike"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#/components/schemas/NewLike"
+              }
+            }
           }
         }
       }
@@ -640,7 +675,10 @@
         }
       },
       "delete": {
-        "description": "",
+        "tags": [
+          "Like"
+        ],
+        "description": "Endpoint to delete a like. The account with given jwt token is the unliker.",
         "parameters": [
           {
             "name": "id",
@@ -649,11 +687,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "$ref": "#myParameters/jwtToken"
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Returns some message."
           },
           "400": {
             "description": "Bad Request"
@@ -852,6 +893,18 @@
         },
         "xml": {
           "name": "Like"
+        }
+      },
+      "NewLike": {
+        "type": "object",
+        "properties": {
+          "post": {
+            "type": "string",
+            "example": "62fc1563f537fd538eceb2dc"
+          }
+        },
+        "xml": {
+          "name": "NewLike"
         }
       }
     },
