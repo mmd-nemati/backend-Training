@@ -12,6 +12,20 @@ const posts = express();
 posts.use(express.json());
 
 posts.get('/', async (req, res) => {
+    /*
+        #swagger.tags = ['Post']
+        #swagger.description = 'Endpoint to get all posts.'
+        #swagger.parameters[page] = {
+            $ref: "#myParameters/listQuery/page"
+        }
+        #swagger.parameters[limit] = {
+            $ref: "#myParameters/listQuery/limit"
+        }
+        #swagger.responses[200] = {
+            schema: { $ref: "#/definitions/Post" },
+            description: 'Returns a paginated list of posts.'
+        }
+    */
     try {
         const result = await getAllPosts(req);
 
@@ -23,6 +37,14 @@ posts.get('/', async (req, res) => {
 });
 
 posts.get('/:id', async (req, res) => {
+    /*  
+        #swagger.tags = ['Post']
+        #swagger.description = 'Endpoint to get one specific post.' 
+        #swagger.responses[200] = { 
+            schema: { $ref: "#/definitions/Post" },
+            description: "Returns the requested post." 
+        } 
+    */
     try {
         const result = await getOnePost(req.params.id);
 
@@ -39,7 +61,7 @@ posts.post('/', authn, async (req, res) => {
     try {
         const result = await createPost(req);
 
-        res.status(201).send(lodash.pick(result.post, ['text', 'title', 'user', 'created_at']));
+        res.status(201).send(lodash.pick(result.post, ['text', 'title', 'user', 'createdAt']));
     }
     catch (err) {
         if (err.message === 'Invalid token')
@@ -55,7 +77,7 @@ posts.put('/:id', [authn, postAuthz], async (req, res) => {
     try {
         const result = await editPost(req);
 
-        res.send(lodash.pick(result.post, ['text', 'title', 'user', 'updated_at']));
+        res.send(lodash.pick(result.post, ['text', 'title', 'user', 'updatedAt']));
     }
     catch (err) {
         if (err.name === "ValidationError")

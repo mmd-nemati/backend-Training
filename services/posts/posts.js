@@ -10,7 +10,7 @@ async function getAllPosts(req) {
 
         const posts = await Post
             .find()
-            .select('title text user likes created_at -_id')
+            .select('title text user createdAt updatedAt-_id')
             .populate('user', 'name username  -_id')
             .sort(sortOptions)
             .skip((pageOptions.page - 1) * pageOptions.limit)
@@ -27,7 +27,7 @@ async function getOnePost(id) {
     try {
         const post = await Post
             .findById(id)
-            .select('title text user likes created_at -_id')
+            .select('title text user createdAt updatedAt -_id')
             .populate('user', 'name username  -_id')
         if (!post) throw new Error('Post not found');
 
