@@ -336,11 +336,30 @@
         }
       },
       "post": {
-        "description": "",
-        "parameters": [],
+        "tags": [
+          "Post"
+        ],
+        "description": "Endpoint to create a new post.",
+        "parameters": [
+          {
+            "$ref": "#myParameters/jwtToken"
+          }
+        ],
         "responses": {
           "201": {
-            "description": "Created"
+            "description": "Returns the created post.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Post"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Post"
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad Request"
@@ -350,6 +369,21 @@
           },
           "500": {
             "description": "Internal Server Error"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModifyPost"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#/components/schemas/ModifyPost"
+              }
+            }
           }
         }
       }
@@ -395,7 +429,10 @@
         }
       },
       "put": {
-        "description": "",
+        "tags": [
+          "Post"
+        ],
+        "description": "Endpoint to edit a post.",
         "parameters": [
           {
             "name": "id",
@@ -404,11 +441,29 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "$ref": "#myParameters/jwtToken"
           }
         ],
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "201": {
+            "description": "Returns the edited post.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Post"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Post"
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad Request"
@@ -425,10 +480,29 @@
           "500": {
             "description": "Internal Server Error"
           }
+        },
+        "requestBody": {
+          "description": "Non of the parameters are required.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModifyPost"
+              }
+            },
+            "application/xml": {
+              "schema": {
+                "$ref": "#/components/schemas/ModifyPost"
+              }
+            }
+          }
         }
       },
       "delete": {
-        "description": "",
+        "tags": [
+          "Post"
+        ],
+        "description": "Endpoint to delete a post.",
         "parameters": [
           {
             "name": "id",
@@ -437,11 +511,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "$ref": "#myParameters/jwtToken"
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Returns some message."
           },
           "400": {
             "description": "Bad Request"
@@ -684,6 +761,22 @@
         },
         "xml": {
           "name": "Post"
+        }
+      },
+      "ModifyPost": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "example": "New post from Shire!"
+          },
+          "text": {
+            "type": "string",
+            "example": "Todat is a nice day! Hope to enjoy it."
+          }
+        },
+        "xml": {
+          "name": "ModifyPost"
         }
       }
     },

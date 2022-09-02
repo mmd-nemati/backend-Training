@@ -58,10 +58,25 @@ posts.get('/:id', async (req, res) => {
 });
 
 posts.post('/', authn, async (req, res) => {
+    /*  
+        #swagger.tags = ['Post']
+        #swagger.description = 'Endpoint to create a new post.' 
+        #swagger.responses[201] = { 
+            description: "Returns the created post.",
+            schema: { $ref: '#/definitions/Post' },
+        }
+        #swagger.parameters[jwtToken] = {
+            $ref: "#myParameters/jwtToken"
+        }
+        #swagger.requestBody[newPost] = {
+            required: true,
+            schema: { $ref: '#/definitions/ModifyPost' }
+        }
+    */
     try {
         const result = await createPost(req);
 
-        res.status(201).send(lodash.pick(result.post, ['text', 'title', 'user', 'createdAt']));
+        res.status(201).send(lodash.pick(result.post, ['text', 'title', 'user', 'createdAt', 'updatedAt']));
     }
     catch (err) {
         if (err.message === 'Invalid token')
@@ -74,10 +89,26 @@ posts.post('/', authn, async (req, res) => {
 });
 
 posts.put('/:id', [authn, postAuthz], async (req, res) => {
+    /*  
+        #swagger.tags = ['Post']
+        #swagger.description = 'Endpoint to edit a post.' 
+        #swagger.responses[201] = { 
+            description: "Returns the edited post.",
+            schema: { $ref: '#/definitions/Post' },
+        }
+        #swagger.parameters[jwtToken] = {
+            $ref: "#myParameters/jwtToken"
+        }
+        #swagger.requestBody[ModifyPost] = {
+            description: "Non of the parameters are required.",
+            required: true,
+            schema: { $ref: '#/definitions/ModifyPost' }
+        }
+    */
     try {
         const result = await editPost(req);
 
-        res.send(lodash.pick(result.post, ['text', 'title', 'user', 'updatedAt']));
+        res.send(lodash.pick(result.post, ['text', 'title', 'user', 'createdAt', 'updatedAt']));
     }
     catch (err) {
         if (err.name === "ValidationError")
@@ -88,6 +119,16 @@ posts.put('/:id', [authn, postAuthz], async (req, res) => {
 });
 
 posts.delete('/:id', [authn, postAuthz], async (req, res) => {
+    /*  
+        #swagger.tags = ['Post']
+        #swagger.description = 'Endpoint to delete a post.' 
+        #swagger.responses[200] = { 
+            description: "Returns some message."
+        }
+        #swagger.parameters[jwtToken] = {
+            $ref: "#myParameters/jwtToken"
+        }
+    */
     try {
         await deletePost(req);
 

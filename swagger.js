@@ -126,6 +126,10 @@ const doc = {
             user: "Frodo_Baggins",
             createdAt: "2022-08-12T17:35:23.017Z",
             updatedAt: "2022-09-11T20:11:56.017Z"
+        },
+        ModifyPost: {
+            title: "New post from Shire!",
+            text: "Todat is a nice day! Hope to enjoy it."
         }
     }
 }
