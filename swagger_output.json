@@ -21,6 +21,10 @@
     {
       "name": "Post",
       "description": "Endpoints"
+    },
+    {
+      "name": "Like",
+      "description": "Endpoints"
     }
   ],
   "paths": {
@@ -540,11 +544,33 @@
     },
     "/api/likes/": {
       "get": {
-        "description": "",
-        "parameters": [],
+        "tags": [
+          "Like"
+        ],
+        "description": "Endpoint to get all likes.",
+        "parameters": [
+          {
+            "$ref": "#myParameters/listQuery/page"
+          },
+          {
+            "$ref": "#myParameters/listQuery/limit"
+          }
+        ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Returns a paginated list of likes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Like"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Like"
+                }
+              }
+            }
           },
           "500": {
             "description": "Internal Server Error"
@@ -578,7 +604,10 @@
     },
     "/api/likes/{id}": {
       "get": {
-        "description": "",
+        "tags": [
+          "Like"
+        ],
+        "description": "Endpoint to get one specific like.",
         "parameters": [
           {
             "name": "id",
@@ -591,7 +620,19 @@
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Returns the requested like.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Like"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/Like"
+                }
+              }
+            }
           },
           "500": {
             "description": "Internal Server Error"
@@ -777,6 +818,40 @@
         },
         "xml": {
           "name": "ModifyPost"
+        }
+      },
+      "Like": {
+        "type": "object",
+        "properties": {
+          "post": {
+            "type": "object",
+            "properties": {
+              "_id": {
+                "type": "string",
+                "example": "62fc1563f537fd538eceb2dc"
+              },
+              "title": {
+                "type": "string",
+                "example": "New post from Shire!"
+              }
+            }
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "username": {
+                "type": "string",
+                "example": "Frodo Baggins"
+              }
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2022-08-17T20:15:39.919Z"
+          }
+        },
+        "xml": {
+          "name": "Like"
         }
       }
     },

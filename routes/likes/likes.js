@@ -12,6 +12,20 @@ const likes = express();
 likes.use(express.json());
 
 likes.get('/', async (req, res) => {
+    /*
+        #swagger.tags = ['Like']
+        #swagger.description = 'Endpoint to get all likes.'
+        #swagger.parameters[page] = {
+            $ref: "#myParameters/listQuery/page"
+        }
+        #swagger.parameters[limit] = {
+            $ref: "#myParameters/listQuery/limit"
+        }
+        #swagger.responses[200] = {
+            schema: { $ref: "#/definitions/Like" },
+            description: 'Returns a paginated list of likes.'
+        }
+    */
     try {
         const result = await getAllLikes(req);
 
@@ -23,6 +37,14 @@ likes.get('/', async (req, res) => {
 });
 
 likes.get('/:id', async (req, res) => {
+    /*  
+        #swagger.tags = ['Like']
+        #swagger.description = 'Endpoint to get one specific like.' 
+        #swagger.responses[200] = { 
+            schema: { $ref: "#/definitions/Like" },
+            description: "Returns the requested like." 
+        } 
+    */    
     try {
         const result = await getOneLike(req.params.id);
 
