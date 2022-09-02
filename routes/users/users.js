@@ -13,6 +13,20 @@ const users = express();
 users.use(express.json());
 
 users.get('/', async (req, res) => {
+    /*
+        #swagger.tags = ['User']
+        #swagger.description = 'Endpoint to get all users.'
+        #swagger.parameters[page] = {
+            $ref: "#myParameters/listQuery/page"
+        }
+        #swagger.parameters[limit] = {
+            $ref: "#myParameters/listQuery/limit"
+        }
+        #swagger.responses[200] = {
+            schema: { $ref: "#/definitions/User" },
+            description: 'Returns a paginated list of users.'
+        }
+    */
     try {
         const result = await getAllUsers(req);
 
@@ -24,6 +38,14 @@ users.get('/', async (req, res) => {
 });
 
 users.get('/:id', async (req, res) => {
+    /*  
+        #swagger.tags = ['User']
+        #swagger.description = 'Endpoint to get one specific user.' 
+        #swagger.responses[200] = { 
+            schema: { $ref: "#/definitions/User" },
+            description: "Returns the requested user." 
+        } 
+    */
     try {
         const result = await getOneUser(req.params.id);
 
@@ -37,10 +59,28 @@ users.get('/:id', async (req, res) => {
 });
 
 users.post('/', async (req, res) => {
+    /*  
+        #swagger.tags = ['User']
+        #swagger.description = 'Endpoint to create a new user.' 
+        #swagger.responses[201] = { 
+            description: "Returns the created user, no updatedAt.",
+            schema: { $ref: '#/definitions/User' },
+            "headers": {
+                "x-auth-token": {
+                    "type": 'string',
+                    "description": 'JWT token.'
+                }
+            }
+        }
+        #swagger.requestBody[newUser] = {
+            required: true,
+            schema: { $ref: '#/definitions/NewUser' }
+        }
+    */
     try {
         const result = await signUp(req);
 
-        res.header(config.get('authTokenName'), result.token).status(201).send(lodash.pick(result.user, ['name', 'username', 'created_at']));
+        res.header(config.get('authTokenName'), result.token).status(201).send(lodash.pick(result.user, ['name', 'username', 'age', 'created_at']));
     }
     catch (err) {
         if (err.name === "ValidationError")
@@ -55,6 +95,24 @@ users.post('/', async (req, res) => {
 });
 
 users.post('/login', async (req, res) => {
+    /*  
+        #swagger.tags = ['User']
+        #swagger.description = 'Endpoint to login.' 
+        #swagger.requestBody[Login] = {
+            description: 'Only need one of username or email parameters.',
+            required: true,
+            schema: { $ref: '#/definitions/LoginUser' }
+        }
+        #swagger.responses[200] = {
+            "description": 'Logged in successfully.',
+            "headers": {
+                "x-auth-token": {
+                    "type": 'string',
+                    "description": 'JWT token.'
+                }
+            }
+        }
+    */
     try {
         const result = await login(req);
 
@@ -69,9 +127,25 @@ users.post('/login', async (req, res) => {
 
 users.put('/:id', [authn, userAutzh], async (req, res) => {
     try {
+    /*  
+        #swagger.tags = ['User']
+        #swagger.description = 'Endpoint to edit a user.' 
+        #swagger.responses[200] = { 
+            description: "Returns the updated user, no createdAt.",
+            schema: { $ref: '#/definitions/User' }
+        }
+        #swagger.parameters[jwtToken] = {
+            $ref: "#myParameters/jwtToken"
+        }
+        #swagger.requestBody[editUser] = {
+            required: true,
+            description: 'Non of the parameters are required.',
+            schema: { $ref: '#/definitions/EditUser' },
+        }
+    */
         const result = await editUser(req);
 
-        res.status(200).send(lodash.pick(result.user, ['name', 'username', 'age']));
+        res.status(200).send(lodash.pick(result.user, ['name', 'username', 'age', 'updatedAt']));
     }
     catch (err) {
         if (err.name === "ValidationError")
@@ -85,6 +159,16 @@ users.put('/:id', [authn, userAutzh], async (req, res) => {
 
 users.delete('/:id', [authn, userAutzh], async (req, res) => {
     try {
+    /*  
+        #swagger.tags = ['User']
+        #swagger.description = 'Endpoint to delete a user.' 
+        #swagger.responses[200] = { 
+            description: "Returns some message."
+        }
+        #swagger.parameters[jwtToken] = {
+            $ref: "#myParameters/jwtToken"
+        }
+    */
         const result = await deleteUser(req);
 
         res.status(200).send(`${result.user.username} was deleted successfully.`);

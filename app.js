@@ -1,6 +1,8 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import config from 'config';
+import swaggerUi from 'swagger-ui-express';
+import swaggerFile from'./swagger_output.json' assert{ type: 'json' };
 import { routes } from './routes/routes.js';
 const port = process.env.PORT || 5000;
 
@@ -15,5 +17,8 @@ mongoose.connect(config.get('dbpath'))
 
 const app = express();
 app.use('/', routes);
+app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerFile,  {
+    swaggerOptions: { defaultModelsExpandDepth: -1 },
+  }));
 
 app.listen(port, () => console.log(`Listening on ${port}...`));
