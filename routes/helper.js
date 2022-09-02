@@ -1,5 +1,3 @@
-import { forEach } from "underscore";
-
 function setSortOptins(query) {
     let sorts = ['created_at', '-created_at', 'name', '-name', 'age', '-age'];
     let sortParams = query.sort;

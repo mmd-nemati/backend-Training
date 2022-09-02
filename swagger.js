@@ -1,10 +1,5 @@
 import swaggerAutogen from 'swagger-autogen';
-import m2s from 'mongoose-to-swagger';
-import { User } from './models/user/user.js';
 
-const UserDoc = m2s(User, {
-    omitFields: ['_id']
-});
 const outputFile = './swagger_output.json'
 const endpointsFiles = ['./app.js']
 

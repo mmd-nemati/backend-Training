@@ -2,7 +2,8 @@ import express from 'express';
 import mongoose from 'mongoose';
 import config from 'config';
 import swaggerUi from 'swagger-ui-express';
-import swaggerFile from'./swagger_output.json' assert{ type: 'json' };
+import { readFileSync } from "fs";
+const swaggerFile = JSON.parse(readFileSync("./swagger_output.json"));
 import { routes } from './routes/routes.js';
 const port = process.env.PORT || 5000;
 

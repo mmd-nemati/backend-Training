@@ -18,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/mmd-nemati/backend-Training/issues"
   },
-  "homepage": "https://github.com/mmd-nemati/backend-Training#readme"
+  "homepage": "https://github.com/mmd-nemati/backend-Training#readme",
+  "devDependencies": {
+    "eslint": "^8.23.0"
+  }
 }
